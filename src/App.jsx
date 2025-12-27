@@ -110,7 +110,7 @@ const GuidelinesModal = ({ isOpen, onClose, onAccept }) => {
           </li>
           <li className="flex gap-2">
             <Shield className="w-4 h-4 text-green-500 shrink-0" />
-            <span><strong>Fact-Check Your Scoop:</strong> Ensure your review is based on a genuine interaction.</span>
+            <span><strong>Fact-Check Your Review:</strong> Ensure your review is based on a genuine interaction.</span>
           </li>
         </ul>
         <div className="flex justify-end gap-3">
@@ -451,7 +451,7 @@ export default function App() {
     try {
       const reviewRef = doc(db, 'artifacts', appId, 'public', 'data', 'reviews', reviewId);
       await updateDoc(reviewRef, { flags: (currentFlags || 0) + 1 });
-      alert("This Scoop has been flagged for moderation. Thanks for keeping the intel verified.");
+      alert("This Review has been flagged for moderation. Thanks for keeping the intel verified.");
     } catch (err) { console.error(err); }
   };
 
@@ -588,7 +588,7 @@ export default function App() {
                     <Briefcase className="w-3 h-3" /> {recruiter.firm}
                   </div>
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    <span>{recruiter.reviewCount || 0} Scoops</span>
+                    <span>{recruiter.reviewCount || 0} {recruiter.reviewCount === 1 ? 'Review' : 'Reviews'}</span>
                   </div>
                 </div>
               </div>
@@ -630,7 +630,7 @@ export default function App() {
           <div className="flex gap-4 items-center">
              <div className="text-right hidden md:block">
                 <div className="text-sm font-bold text-gray-400 uppercase tracking-wider">Overall Verdict</div>
-                <div className="text-xs text-gray-400">Based on {selectedRecruiter.reviewCount || 0} scoops</div>
+                <div className="text-xs text-gray-400">Based on {selectedRecruiter.reviewCount || 0} {selectedRecruiter.reviewCount === 1 ? 'review' : 'reviews'}</div>
              </div>
              <div className={`text-5xl md:text-6xl font-black tracking-tighter ${
                 selectedRecruiter.rating >= 4 ? 'text-green-500' : 
@@ -647,13 +647,13 @@ export default function App() {
         <div>
           <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
             <Newspaper className="w-5 h-5" />
-            Latest Scoops
+            Latest Reviews
           </h3>
         </div>
         {hasReviewed ? (
           <div className="bg-green-100 text-green-800 px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-sm border border-green-200">
             <Check className="w-5 h-5" />
-            Scoop Submitted
+            Review Submitted
           </div>
         ) : (
           <button 
@@ -661,7 +661,7 @@ export default function App() {
             className="bg-black text-white px-6 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition-colors shadow-lg flex items-center gap-2"
           >
             <Flag className="w-4 h-4" />
-            Submit a Scoop
+            Submit a Review
           </button>
         )}
       </div>
@@ -727,7 +727,7 @@ export default function App() {
             <button 
               onClick={() => handleFlagReview(review.id, review.flags)}
               className="absolute top-6 right-6 text-gray-300 hover:text-red-500"
-              title="Report this scoop"
+              title="Report this review"
             >
               <Flag className="w-4 h-4" />
             </button>
@@ -735,16 +735,16 @@ export default function App() {
         )) : (
           <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
             <Newspaper className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No Scoops Yet</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No Reviews Yet</h3>
             <p className="text-gray-500 mb-6">Be the first to share intel on {selectedRecruiter.name.split(' ')[0]}.</p>
             {hasReviewed ? (
-              <p className="text-green-600 font-bold">You've submitted the first scoop!</p>
+              <p className="text-green-600 font-bold">You've submitted the first review!</p>
             ) : (
               <button 
                 onClick={() => setShowGuidelines(true)}
                 className="text-blue-600 font-bold hover:underline"
               >
-                Submit a Scoop now
+                Submit a Review now
               </button>
             )}
           </div>
@@ -772,7 +772,7 @@ export default function App() {
     let content = {
       headline: "Intel Received. 📂",
       emoji: "📂",
-      body: "You're officially an insider. Thanks to you, the hiring market just got a little less opaque. We are processing your scoop now.",
+      body: "You're officially an insider. Thanks to you, the hiring market just got a little less opaque. We are processing your review now.",
       primaryBtn: "Share Intel on LinkedIn",
       shareText: `Just checked the intel on my recruiter at RecruiterScoop.com. Don't fly blind.`,
       secondaryLink: "Search for another recruiter"
@@ -780,9 +780,9 @@ export default function App() {
 
     if (isPositive) {
       content = {
-        headline: "Scoop Secured.",
+        headline: "Review Secured.",
         emoji: "🚀",
-        body: "Thanks for highlighting the good ones! The hiring industry needs more recruiters like that, and you just helped them stand out from the noise. Your scoop is now live.",
+        body: "Thanks for highlighting the good ones! The hiring industry needs more recruiters like that, and you just helped them stand out from the noise. Your review is now live.",
         primaryBtn: "Share the Love on LinkedIn",
         shareText: `Just gave my recruiter a glowing review on RecruiterScoop.com. Good recruiters deserve to be seen. Go check your grade!`,
         secondaryLink: "See who else is hiring"
@@ -791,7 +791,7 @@ export default function App() {
       content = {
         headline: "Loud and Clear.",
         emoji: "🛡️",
-        body: "Thanks for speaking up. Transparency is the only way to fix broken hiring processes. Your scoop has been added to the database and will help future candidates dodge a bullet.",
+        body: "Thanks for speaking up. Transparency is the only way to fix broken hiring processes. Your review has been added to the database and will help future candidates dodge a bullet.",
         primaryBtn: "Warn Your Network (Anonymously)",
         shareText: `Hiring is tough enough without bad actors. I just dropped some honest intel on RecruiterScoop.com. Before you take that call, check the scoop.`,
         secondaryLink: "Read other horror stories"
@@ -812,7 +812,7 @@ export default function App() {
 
           {/* The Share Card - Visual Rep of the Scoop - Straightened by removing rotate class */}
           <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-10 text-left shadow-sm">
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Scoop Confirmed</div>
+            <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Review Confirmed</div>
             <h3 className="text-2xl font-black text-gray-900 mb-1">"{submittedReview.headline}"</h3>
             <div className="text-gray-500 font-medium">
                Re: {submittedReview.recruiterName} <span className="text-gray-300 mx-2">|</span> {submittedReview.firm}
@@ -850,7 +850,7 @@ export default function App() {
                    <div className="font-bold text-gray-900 group-hover:text-blue-600 flex items-center gap-2">
                      Search Previous Recruiter <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                    </div>
-                   <div className="text-xs text-gray-500 mt-1">Leave another scoop</div>
+                   <div className="text-xs text-gray-500 mt-1">Leave another review</div>
                 </button>
                 <button 
                    onClick={() => { handleSetView('headlines'); }}
@@ -883,7 +883,7 @@ export default function App() {
         <div className="mb-10 border-b pb-6">
           <div className="flex items-center gap-3 mb-2">
              <div className="bg-blue-100 p-2 rounded-lg"><Newspaper className="w-6 h-6 text-blue-600" /></div>
-             <h2 className="text-3xl font-black text-gray-900">Submit a Scoop</h2>
+             <h2 className="text-3xl font-black text-gray-900">Submit a Review</h2>
           </div>
           <p className="text-gray-500 text-lg">You are investigating <span className="font-bold text-gray-900">{selectedRecruiter.name}</span> at {selectedRecruiter.firm}</p>
         </div>
@@ -913,7 +913,7 @@ export default function App() {
 
         {/* Question 2: The Scoop Score (Matrix) */}
         <div className="mb-12">
-          <h3 className="text-lg font-black text-gray-900 mb-1">2. The Scoop Score</h3>
+          <h3 className="text-lg font-black text-gray-900 mb-1">2. The Review Score</h3>
           <p className="text-sm text-gray-500 mb-4">Give us the intel. Which of these are true? (Select all that apply)</p>
           
           <div className="grid md:grid-cols-2 gap-6">
