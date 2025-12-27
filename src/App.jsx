@@ -808,14 +808,7 @@ export default function App() {
               : (searchQuery ? 'Search Results' : 'Headline Recruiters')
             }
           </h2>
-          {!showAutoAddProfile && (
-            <button 
-              onClick={() => handleSetView('add')}
-              className="text-blue-600 font-bold text-sm hover:underline flex items-center gap-1"
-            >
-              <UserPlus className="w-4 h-4" /> Add Profile
-            </button>
-          )}
+          {/* "Add Profile" button removed from here */}
         </div>
 
         {/* Conditional Rendering: Grid vs Auto-Add Form */}
