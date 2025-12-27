@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from "firebase/analytics";
 import { 
@@ -48,8 +48,29 @@ import {
   Twitter,
   Facebook,
   Mail,
-  Link as LinkIcon
+  Link as LinkIcon,
+  AlertTriangle,
+  Building
 } from 'lucide-react';
+
+// --- Utilities ---
+
+// Simple Browser Fingerprint to deter incognito spam
+const getBrowserFingerprint = () => {
+  const { userAgent, language, pixelDepth, colorDepth } = navigator;
+  const { width, height } = screen;
+  const timezoneOffset = new Date().getTimezoneOffset();
+  const data = `${userAgent}-${language}-${width}x${height}-${pixelDepth}-${colorDepth}-${timezoneOffset}`;
+  
+  // Simple hash function
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) {
+    const char = data.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash).toString(16);
+};
 
 // --- Components ---
 
@@ -339,7 +360,11 @@ const SCOOP_TAGS = [
   // Bad
   { id: 'radio_silence', label: 'Radio Silence', type: 'negative', desc: 'Ignored emails for weeks.' },
   { id: 'role_baiting', label: 'Role Baiting', type: 'negative', desc: 'Job desc didn\'t match reality.' },
-  { id: 'time_waster', label: 'Time Waster', type: 'negative', desc: 'Process took way too long.' }
+  { id: 'time_waster', label: 'Time Waster', type: 'negative', desc: 'Process took way too long.' },
+  // Critical (New)
+  { id: 'fake_listing', label: 'Fake / Ghost Job', type: 'critical', desc: 'Job does not exist or never hires.' },
+  { id: 'mlm_scheme', label: 'MLM / Pyramid Scheme', type: 'critical', desc: 'Requires payment or recruiting others.' },
+  { id: 'identity_theft', label: 'Data Mining Risk', type: 'critical', desc: 'Asked for SSN/Bank info too early.' }
 ];
 
 // 4. Main Application Component
@@ -360,6 +385,9 @@ export default function App() {
   
   // Spam prevention state
   const [hasReviewed, setHasReviewed] = useState(false);
+  
+  // Fingerprint for duplicate detection
+  const [userFingerprint, setUserFingerprint] = useState('');
 
   // New State to hold the review just submitted for the confirmation screen
   const [submittedReview, setSubmittedReview] = useState(null);
@@ -378,7 +406,8 @@ export default function App() {
     firstName: '',
     lastName: '',
     firm: '',
-    location: ''
+    location: '',
+    roleTitle: '' // Added Role Title
   });
 
   const handleSetView = (newView) => {
@@ -388,7 +417,7 @@ export default function App() {
     setShareModalOpen(false); // Ensure modal is closed
     // Reset add form and spam check when moving views (except when moving to 'rate' from 'add')
     if (newView !== 'rate') {
-      setAddRecruiterForm({ firstName: '', lastName: '', firm: '', location: '' });
+      setAddRecruiterForm({ firstName: '', lastName: '', firm: '', location: '', roleTitle: '' });
       setHasReviewed(false);
     }
   };
@@ -398,6 +427,7 @@ export default function App() {
     window.scrollTo(0, 0);
   }, [view]);
 
+  // Auth & Fingerprint
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -408,11 +438,14 @@ export default function App() {
         }
       } catch (err) {
         console.warn("Custom token auth failed (likely mismatch), falling back to anonymous", err);
-        // Fallback to anonymous auth if the environment token doesn't match the project config
         await signInAnonymously(auth);
       }
     };
     initAuth();
+    
+    // Generate fingerprint
+    setUserFingerprint(getBrowserFingerprint());
+
     const unsubscribe = onAuthStateChanged(auth, setUser);
     return () => unsubscribe();
   }, []);
@@ -439,7 +472,7 @@ export default function App() {
     }
   }, [recruiters]); 
 
-  // Fetch reviews and check for spam/existing reviews
+  // Fetch reviews and check for spam/existing reviews using Fingerprint
   useEffect(() => {
     if (!user || !selectedRecruiter) return;
     
@@ -459,24 +492,31 @@ export default function App() {
       
       setReviews(relatedReviews);
 
-      // Check if current user has already left a review
-      const myReview = relatedReviews.find(r => r.authorId === user.uid);
+      // Check if current user has already left a review based on UID OR Fingerprint
+      // This helps catch Incognito users or cleared cache users
+      const myReview = relatedReviews.find(r => 
+        r.authorId === user.uid || (r.fingerprint && r.fingerprint === userFingerprint)
+      );
       setHasReviewed(!!myReview);
 
     }, console.error);
-  }, [user, selectedRecruiter]);
+  }, [user, selectedRecruiter, userFingerprint]);
 
   const handleAddRecruiter = (e) => {
     e.preventDefault();
-    if (!addRecruiterForm.firstName || !addRecruiterForm.lastName || !addRecruiterForm.firm) return;
+    // Logic change: Require Firm AND Role Title. Name is optional.
+    if (!addRecruiterForm.firm || !addRecruiterForm.roleTitle) return;
+
+    const hasName = addRecruiterForm.firstName || addRecruiterForm.lastName;
 
     // We do NOT save to DB yet. We move to the Rate step first.
     // We create a temporary recruiter object for the UI to use.
     setSelectedRecruiter({
       id: 'temp_new_recruiter',
-      name: `${addRecruiterForm.firstName} ${addRecruiterForm.lastName}`,
+      name: hasName ? `${addRecruiterForm.firstName} ${addRecruiterForm.lastName}`.trim() : '',
       firm: addRecruiterForm.firm,
       location: addRecruiterForm.location,
+      roleTitle: addRecruiterForm.roleTitle,
       rating: 0,
       reviewCount: 0
     });
@@ -499,6 +539,7 @@ export default function App() {
             name: selectedRecruiter.name,
             firm: selectedRecruiter.firm,
             location: selectedRecruiter.location,
+            roleTitle: selectedRecruiter.roleTitle || '',
             rating: 0,
             reviewCount: 0,
             createdAt: serverTimestamp(),
@@ -508,7 +549,7 @@ export default function App() {
          finalRecruiterId = docRef.id;
       }
 
-      // 2. Create Review
+      // 2. Create Review with Fingerprint
       await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'reviews'), {
         recruiterId: finalRecruiterId,
         stage: rateForm.stage,
@@ -517,6 +558,7 @@ export default function App() {
         comment: rateForm.comment,
         rating: rateForm.rating, 
         authorId: user.uid,
+        fingerprint: userFingerprint, // Save fingerprint for dup detection
         timestamp: serverTimestamp(),
         flags: 0
       });
@@ -539,7 +581,7 @@ export default function App() {
       setSubmittedReview({
         rating: rateForm.rating,
         headline: rateForm.headline,
-        recruiterName: finalRecruiterName,
+        recruiterName: finalRecruiterName || 'Hiring Team', // Fallback for success view
         firm: finalRecruiterFirm
       });
 
@@ -571,17 +613,99 @@ export default function App() {
 
   const toggleTag = (tagId) => {
     setRateForm(prev => {
-      const tags = prev.tags.includes(tagId)
-        ? prev.tags.filter(t => t !== tagId)
-        : [...prev.tags, tagId]; 
-      return { ...prev, tags };
+      const isCritical = SCOOP_TAGS.find(t => t.id === tagId)?.type === 'critical';
+      const isAdding = !prev.tags.includes(tagId);
+      
+      const tags = isAdding
+        ? [...prev.tags, tagId]
+        : prev.tags.filter(t => t !== tagId);
+      
+      let rating = prev.rating;
+      // If adding a critical tag, force rating to 1 star
+      if (isAdding && isCritical) {
+        rating = 1;
+      }
+      return { ...prev, tags, rating };
     });
   };
 
-  const filteredRecruiters = recruiters.filter(r => 
-    r.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.firm?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Autocomplete Logic
+  const bestMatch = useMemo(() => {
+    if (!searchQuery || searchQuery.length < 2) return null;
+    const searchLower = searchQuery.toLowerCase();
+    
+    // 1. Filter: Must start with search query
+    const matches = recruiters.filter(r => 
+      r.name?.toLowerCase().startsWith(searchLower)
+    );
+
+    if (matches.length === 0) return null;
+
+    // 2. Rank: High review count first (proxy for profile views/popularity)
+    return matches.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0))[0];
+  }, [recruiters, searchQuery]);
+
+  const handleSearchKeyDown = (e) => {
+    if ((e.key === 'Tab' || e.key === 'ArrowRight') && bestMatch) {
+      e.preventDefault();
+      setSearchQuery(bestMatch.name);
+    }
+    
+    // New: Enter key navigation
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // Check if current search query matches a recruiter exactly (case-insensitive)
+      const exactMatch = recruiters.find(r => r.name?.toLowerCase() === searchQuery.toLowerCase());
+      
+      if (exactMatch) {
+        // If exact match found, go directly to profile
+        setSelectedRecruiter(exactMatch);
+        handleSetView('recruiter');
+      } else if (bestMatch && bestMatch.name.toLowerCase() === searchQuery.toLowerCase()) {
+        // Fallback: If bestMatch matches the text, go there
+        setSelectedRecruiter(bestMatch);
+        handleSetView('recruiter');
+      }
+    }
+  };
+
+  // Filter & Sort Logic
+  const filteredRecruiters = useMemo(() => {
+    const searchLower = searchQuery.toLowerCase();
+    
+    // Filter first
+    const matches = recruiters.filter(r => 
+      r.name?.toLowerCase().includes(searchLower) ||
+      r.firm?.toLowerCase().includes(searchLower)
+    );
+
+    // Sort: Alphabetical first, then by Review Count (Popularity)
+    return matches.sort((a, b) => {
+      // 1. Sort by Name Alphabetically
+      // Use "Hiring Team" string if name is empty for sorting comparison
+      const nameA = a.name || "Hiring Team";
+      const nameB = b.name || "Hiring Team";
+      const nameCompare = nameA.localeCompare(nameB);
+      if (nameCompare !== 0) return nameCompare;
+      
+      // 2. If names are identical, sort by number of reviews (Highest first) "Probability"
+      return (b.reviewCount || 0) - (a.reviewCount || 0);
+    });
+  }, [recruiters, searchQuery]);
+
+  // Determine if we should show the "Add Profile" view automatically
+  // Show if there is a search query BUT no results
+  const showAutoAddProfile = searchQuery.length > 0 && filteredRecruiters.length === 0;
+
+  const copyToClipboard = (text) => {
+    const el = document.createElement('textarea');
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    alert("Text copied to clipboard! Ready to paste into LinkedIn.");
+  };
 
   // --- Static Pages Renderers ---
 
@@ -643,15 +767,35 @@ export default function App() {
           Get the <span className="font-bold text-gray-900">inside scoop</span> on your next recruiter.
         </p>
         
-        <div className="relative w-full max-w-xl mx-auto mb-16 shadow-2xl rounded-full">
+        <div className="relative w-full max-w-xl mx-auto mb-16 shadow-2xl rounded-full bg-white group">
+          {/* Ghost Text Overlay */}
+          <div className="absolute inset-0 w-full h-16 pl-14 pr-6 rounded-full flex items-center pointer-events-none overflow-hidden text-lg">
+             <span className="text-transparent whitespace-pre">{searchQuery}</span>
+             {bestMatch && bestMatch.name.toLowerCase() !== searchQuery.toLowerCase() && (
+               <span className="text-gray-300">
+                 {bestMatch.name.slice(searchQuery.length)}
+               </span>
+             )}
+          </div>
+
           <input 
             type="text" 
-            placeholder="Find Intel on a firm or recruiter..." 
-            className="w-full h-16 pl-14 pr-6 rounded-full border-0 bg-white text-lg focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+            placeholder={bestMatch ? "" : "Find Intel on a firm or recruiter..."}
+            className="relative w-full h-16 pl-14 pr-6 rounded-full border-0 bg-transparent text-lg focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-900 z-10 placeholder-gray-400"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            spellCheck="false"
+            autoComplete="off"
           />
-          <Search className="absolute left-5 top-5 text-gray-400 w-6 h-6" />
+          <Search className="absolute left-5 top-5 text-gray-400 w-6 h-6 z-20" />
+          
+          {/* Tab Hint */}
+          {bestMatch && bestMatch.name.toLowerCase() !== searchQuery.toLowerCase() && (
+            <div className="absolute right-6 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium pointer-events-none z-20 hidden md:block">
+               Press <span className="border border-gray-200 bg-gray-50 rounded px-1.5 py-0.5 text-[10px]">TAB</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -659,56 +803,130 @@ export default function App() {
         <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
           <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2">
             <Newspaper className="w-5 h-5 text-blue-600" />
-            {searchQuery ? 'Search Results' : 'Headline Recruiters'}
+            {showAutoAddProfile 
+              ? 'Creating Profile' 
+              : (searchQuery ? 'Search Results' : 'Headline Recruiters')
+            }
           </h2>
-          <button 
-            onClick={() => handleSetView('add')}
-            className="text-blue-600 font-bold text-sm hover:underline flex items-center gap-1"
-          >
-            <UserPlus className="w-4 h-4" /> Add Profile
-          </button>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredRecruiters.length > 0 ? (
-            filteredRecruiters.slice(0, 9).map(recruiter => (
-              <div 
-                key={recruiter.id}
-                onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }}
-                className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 p-4">
-                  <div className={`font-black text-xl px-3 py-1 rounded-lg border border-gray-100 transition-colors ${
-                     (recruiter.rating || 0) >= 4 ? 'bg-green-50 text-green-700' :
-                     (recruiter.rating || 0) >= 3 ? 'bg-yellow-50 text-yellow-700' :
-                     'bg-gray-50 text-gray-900'
-                  }`}>
-                    {recruiter.rating ? recruiter.rating.toFixed(1) : '-'}
-                  </div>
-                </div>
-                <div className="pr-12">
-                  <h3 className="font-bold text-lg text-gray-900 mb-1 leading-tight">{recruiter.name}</h3>
-                  <div className="text-gray-500 text-sm flex items-center gap-2 mb-4">
-                    <Briefcase className="w-3 h-3" /> {recruiter.firm}
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    <span>{recruiter.reviewCount || 0} {recruiter.reviewCount === 1 ? 'Review' : 'Reviews'}</span>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-              <p className="text-gray-500 mb-4 text-lg">No intel found for "{searchQuery}"</p>
-              <button 
-                onClick={() => handleSetView('add')}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 shadow-lg"
-              >
-                Submit New Intel
-              </button>
-            </div>
+          {!showAutoAddProfile && (
+            <button 
+              onClick={() => handleSetView('add')}
+              className="text-blue-600 font-bold text-sm hover:underline flex items-center gap-1"
+            >
+              <UserPlus className="w-4 h-4" /> Add Profile
+            </button>
           )}
         </div>
+
+        {/* Conditional Rendering: Grid vs Auto-Add Form */}
+        {showAutoAddProfile ? (
+          // --- AUTO ADD PROFILE MODE ---
+          <div className="bg-white p-8 rounded-2xl shadow-xl border border-blue-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center gap-2 mb-6 text-blue-600">
+              <Info className="w-5 h-5" />
+              <span className="font-bold">No intel found. Be the first to add it.</span>
+            </div>
+            
+            <form onSubmit={handleAddRecruiter} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">First Name <span className="text-gray-400 font-normal">(Optional)</span></label>
+                  <input 
+                    className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    value={addRecruiterForm.firstName}
+                    onChange={e => setAddRecruiterForm({...addRecruiterForm, firstName: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Last Name <span className="text-gray-400 font-normal">(Optional)</span></label>
+                  <input 
+                    className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    value={addRecruiterForm.lastName}
+                    onChange={e => setAddRecruiterForm({...addRecruiterForm, lastName: e.target.value})}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Role Applied For <span className="text-red-500">*</span></label>
+                <input 
+                  required
+                  placeholder="e.g. Software Engineer, Account Executive..."
+                  className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  value={addRecruiterForm.roleTitle}
+                  onChange={e => setAddRecruiterForm({...addRecruiterForm, roleTitle: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Company <span className="text-red-500">*</span></label>
+                <input 
+                  required
+                  placeholder="e.g. Google, Amazon, TekSystems..."
+                  className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  value={addRecruiterForm.firm}
+                  onChange={e => setAddRecruiterForm({...addRecruiterForm, firm: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Location (City, State)</label>
+                <input 
+                  className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  value={addRecruiterForm.location}
+                  onChange={e => setAddRecruiterForm({...addRecruiterForm, location: e.target.value})}
+                />
+              </div>
+
+              <button 
+                type="submit"
+                // Logic: Firm AND Role are required.
+                disabled={!addRecruiterForm.firm || !addRecruiterForm.roleTitle}
+                className={`w-full font-bold py-4 rounded-xl transition-colors mt-6 flex items-center justify-center gap-2 ${
+                  addRecruiterForm.firm && addRecruiterForm.roleTitle
+                    ? 'bg-black text-white hover:bg-gray-900 shadow-lg' 
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                Next: Write Review <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        ) : (
+          // --- STANDARD GRID MODE ---
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredRecruiters.map(recruiter => (
+                <div 
+                  key={recruiter.id}
+                  onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }}
+                  className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 p-4">
+                    <div className={`font-black text-xl px-3 py-1 rounded-lg border border-gray-100 transition-colors ${
+                       (recruiter.rating || 0) >= 4 ? 'bg-green-50 text-green-700' :
+                       (recruiter.rating || 0) >= 3 ? 'bg-yellow-50 text-yellow-700' :
+                       'bg-gray-50 text-gray-900'
+                    }`}>
+                      {recruiter.rating ? recruiter.rating.toFixed(1) : '-'}
+                    </div>
+                  </div>
+                  <div className="pr-12">
+                    <h3 className="font-bold text-lg text-gray-900 mb-1 leading-tight">{recruiter.name || "Hiring Team"}</h3>
+                    <div className="text-gray-500 text-sm flex items-center gap-2 mb-4">
+                      <Building className="w-3 h-3" /> {recruiter.firm}
+                    </div>
+                    {recruiter.roleTitle && (
+                      <div className="flex items-center gap-2 text-xs font-bold text-blue-600 mb-4">
+                        <Briefcase className="w-3 h-3" /> {recruiter.roleTitle}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                      <span>{recruiter.reviewCount || 0} {recruiter.reviewCount === 1 ? 'Review' : 'Reviews'}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -724,9 +942,12 @@ export default function App() {
         <div className="absolute top-0 left-0 w-2 h-full bg-blue-600"></div>
         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">{selectedRecruiter.name}</h1>
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">{selectedRecruiter.name || "Hiring Team"}</h1>
             <div className="flex flex-col gap-2 text-lg text-gray-600">
-              <span className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-gray-400" /> {selectedRecruiter.firm}</span>
+              <span className="flex items-center gap-2"><Building className="w-5 h-5 text-gray-400" /> {selectedRecruiter.firm}</span>
+              {selectedRecruiter.roleTitle && (
+                <span className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-gray-400" /> {selectedRecruiter.roleTitle}</span>
+              )}
               <span className="flex items-center gap-2"><MapPin className="w-5 h-5 text-gray-400" /> {selectedRecruiter.location || 'Location Not Listed'}</span>
             </div>
           </div>
@@ -809,10 +1030,12 @@ export default function App() {
                     className={`text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 ${
                       tagDef.type === 'positive' 
                         ? 'bg-green-50 text-green-700 border border-green-100' 
+                        : tagDef.type === 'critical'
+                        ? 'bg-red-600 text-white border-red-600 shadow-md' // Special style for critical
                         : 'bg-red-50 text-red-700 border border-red-100'
                     }`}
                   >
-                    {tagDef.type === 'positive' ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                    {tagDef.type === 'positive' ? <Check className="w-3 h-3" /> : tagDef.type === 'critical' ? <AlertTriangle className="w-3 h-3" /> : <X className="w-3 h-3" />}
                     {tagDef.label}
                   </span>
                 ) : null;
@@ -840,7 +1063,7 @@ export default function App() {
           <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
             <Newspaper className="w-16 h-16 text-gray-200 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">No Reviews Yet</h3>
-            <p className="text-gray-500 mb-6">Be the first to share intel on {selectedRecruiter.name.split(' ')[0]}.</p>
+            <p className="text-gray-500 mb-6">Be the first to share intel on {selectedRecruiter.name ? selectedRecruiter.name.split(' ')[0] : 'this team'}.</p>
             {hasReviewed ? (
               <p className="text-green-600 font-bold">You've submitted the first review!</p>
             ) : (
@@ -997,7 +1220,7 @@ export default function App() {
              <div className="bg-blue-100 p-2 rounded-lg"><Newspaper className="w-6 h-6 text-blue-600" /></div>
              <h2 className="text-3xl font-black text-gray-900">Submit a Review</h2>
           </div>
-          <p className="text-gray-500 text-lg">You are investigating <span className="font-bold text-gray-900">{selectedRecruiter.name}</span> at {selectedRecruiter.firm}</p>
+          <p className="text-gray-500 text-lg">You are investigating <span className="font-bold text-gray-900">{selectedRecruiter.name || "Hiring Team"}</span> at {selectedRecruiter.firm}</p>
         </div>
 
         {/* Question 1: Relationship Check */}
@@ -1171,18 +1394,16 @@ export default function App() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">First Name <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-bold text-gray-700 mb-1">First Name <span className="text-gray-400 font-normal">(Optional)</span></label>
               <input 
-                required
                 className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 value={addRecruiterForm.firstName}
                 onChange={e => setAddRecruiterForm({...addRecruiterForm, firstName: e.target.value})}
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Last Name <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-bold text-gray-700 mb-1">Last Name <span className="text-gray-400 font-normal">(Optional)</span></label>
               <input 
-                required
                 className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 value={addRecruiterForm.lastName}
                 onChange={e => setAddRecruiterForm({...addRecruiterForm, lastName: e.target.value})}
@@ -1191,9 +1412,21 @@ export default function App() {
           </div>
           
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Firm / Agency <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Role Applied For <span className="text-red-500">*</span></label>
             <input 
               required
+              placeholder="e.g. Software Engineer, Account Executive..."
+              className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              value={addRecruiterForm.roleTitle}
+              onChange={e => setAddRecruiterForm({...addRecruiterForm, roleTitle: e.target.value})}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Company <span className="text-red-500">*</span></label>
+            <input 
+              required
+              placeholder="e.g. Google, Amazon, TekSystems..."
               className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
               value={addRecruiterForm.firm}
               onChange={e => setAddRecruiterForm({...addRecruiterForm, firm: e.target.value})}
@@ -1208,19 +1441,17 @@ export default function App() {
             />
           </div>
 
-          <p className="text-xs text-gray-400 mt-2">
-            By adding this profile, you assist others in finding the right intel.
-          </p>
           <button 
             type="submit"
-            disabled={!addRecruiterForm.firstName || !addRecruiterForm.lastName || !addRecruiterForm.firm}
-            className={`w-full font-bold py-4 rounded-xl transition-colors mt-6 ${
-              addRecruiterForm.firstName && addRecruiterForm.lastName && addRecruiterForm.firm
+            // Logic: Firm AND Role are required.
+            disabled={!addRecruiterForm.firm || !addRecruiterForm.roleTitle}
+            className={`w-full font-bold py-4 rounded-xl transition-colors mt-6 flex items-center justify-center gap-2 ${
+              addRecruiterForm.firm && addRecruiterForm.roleTitle
                 ? 'bg-black text-white hover:bg-gray-900 shadow-lg' 
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }`}
           >
-            Next: Write Review
+            Next: Write Review <ArrowRight className="w-4 h-4" />
           </button>
         </form>
       </div>
@@ -1313,7 +1544,7 @@ export default function App() {
             <h4 className="text-white font-bold mb-6 text-lg">Intel</h4>
             <ul className="space-y-4">
               <li><button onClick={() => { handleSetView('home'); setSearchQuery(''); }} className="hover:text-white transition-colors text-left">Find Intel</button></li>
-              <li><button onClick={() => handleSetView('add')} className="hover:text-white transition-colors text-left">Submit a Scoop</button></li>
+              <li><button onClick={() => handleSetView('add')} className="hover:text-white transition-colors text-left">Submit a Review</button></li>
               <li><button onClick={() => handleSetView('home')} className="hover:text-white transition-colors text-left">Headline Recruiters</button></li>
               <li><button onClick={() => handleSetView('blog')} className="hover:text-white transition-colors text-left">Intel Blog</button></li>
             </ul>
