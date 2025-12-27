@@ -18,7 +18,8 @@ import {
   doc,
   updateDoc,
   increment,
-  getDoc
+  getDoc,
+  limit
 } from 'firebase/firestore';
 import { 
   Search, 
@@ -40,50 +41,48 @@ import {
   AlertCircle,
   Share2,
   Copy,
-  ArrowRight
+  ArrowRight,
+  BookOpen,
+  FileText
 } from 'lucide-react';
 
-// --- Configuration & Initialization ---
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDCmNjPM2avnmrw9qOGB_7S7zG4l0AuHqc",
-  authDomain: "recruiterscoop.firebaseapp.com",
-  projectId: "recruiterscoop",
-  storageBucket: "recruiterscoop.firebasestorage.app",
-  messagingSenderId: "850975692966",
-  appId: "1:850975692966:web:3f5ca72035f508a8adbc67",
-  measurementId: "G-8PD21B2XYQ"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const analytics = getAnalytics(app);
-const appId = 'recruiter-scoop';
-
-// --- Constants & Data ---
-
-const STAGES = [
-  { id: 'initial', label: 'Initial Chat', desc: 'We spoke, but nothing happened.' },
-  { id: 'submitted', label: 'Submitted', desc: 'They sent my resume to the company.' },
-  { id: 'interviewed', label: 'Interviewed', desc: 'I got in front of the hiring manager.' },
-  { id: 'ghosted', label: 'Ghosted', desc: 'They vanished mid-process.' },
-  { id: 'hired', label: 'Hired', desc: 'I got the job!' }
-];
-
-const SCOOP_TAGS = [
-  // Good
-  { id: 'straight_shooter', label: 'Straight Shooter', type: 'positive', desc: 'Honest about salary & remote work.' },
-  { id: 'feedback_loop', label: 'Feedback Loop', type: 'positive', desc: 'Gave me actual feedback.' },
-  { id: 'career_advocate', label: 'Career Advocate', type: 'positive', desc: 'Fought for my offer/terms.' },
-  // Bad
-  { id: 'radio_silence', label: 'Radio Silence', type: 'negative', desc: 'Ignored emails for weeks.' },
-  { id: 'role_baiting', label: 'Role Baiting', type: 'negative', desc: 'Job desc didn\'t match reality.' },
-  { id: 'time_waster', label: 'Time Waster', type: 'negative', desc: 'Process took way too long.' }
-];
-
 // --- Components ---
+
+// Integrated Logo Component
+const Logo = ({ className = "w-8 h-8", textClassName = "text-xl" }) => (
+  <div className="flex items-center gap-2 select-none">
+    <div className="relative">
+      <svg 
+        viewBox="0 0 100 100" 
+        className={className} 
+        fill="none" 
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path 
+          d="M10 50C10 27.9086 27.9086 10 50 10C72.0914 10 90 27.9086 90 50C90 72.0914 72.0914 90 50 90C38.6 90 28.5 85.1 21.5 77.5L10 85V50Z" 
+          className="fill-black"
+        />
+        <path 
+          d="M65 65L82 82" 
+          stroke="white" 
+          strokeWidth="8" 
+          strokeLinecap="round"
+        />
+        <circle cx="45" cy="45" r="18" className="fill-blue-600" />
+        <path 
+          d="M38 45L43 50L53 40" 
+          stroke="white" 
+          strokeWidth="4" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+    <span className={`font-black tracking-tight text-gray-900 ${textClassName}`}>
+      Recruiter<span className="text-blue-600">Scoop</span>
+    </span>
+  </div>
+);
 
 // 1. Legal/Disclaimer Modal
 const GuidelinesModal = ({ isOpen, onClose, onAccept }) => {
@@ -128,7 +127,7 @@ const GuidelinesModal = ({ isOpen, onClose, onAccept }) => {
   );
 };
 
-// 2. Star Rating Input (Reusable)
+// 2. Star Rating Input
 const StarRating = ({ rating, setRating, interactive = true, size = "md" }) => {
   const sizeClasses = size === "lg" ? "w-8 h-8" : "w-5 h-5";
   
@@ -144,6 +143,7 @@ const StarRating = ({ rating, setRating, interactive = true, size = "md" }) => {
         >
           <Star 
             className={`${sizeClasses} ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} 
+            fill={star <= rating ? "currentColor" : "none"}
           />
         </button>
       ))}
@@ -192,6 +192,46 @@ const Captcha = ({ onVerify }) => {
   );
 };
 
+// --- Configuration & Initialization ---
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDCmNjPM2avnmrw9qOGB_7S7zG4l0AuHqc",
+  authDomain: "recruiterscoop.firebaseapp.com",
+  projectId: "recruiterscoop",
+  storageBucket: "recruiterscoop.firebasestorage.app",
+  messagingSenderId: "850975692966",
+  appId: "1:850975692966:web:3f5ca72035f508a8adbc67",
+  measurementId: "G-8PD21B2XYQ"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const analytics = getAnalytics(app);
+const appId = 'recruiter-scoop';
+
+// --- Constants & Data ---
+
+const STAGES = [
+  { id: 'initial', label: 'Initial Chat', desc: 'We spoke, but nothing happened.' },
+  { id: 'submitted', label: 'Submitted', desc: 'They sent my resume to the company.' },
+  { id: 'interviewed', label: 'Interviewed', desc: 'I got in front of the hiring manager.' },
+  { id: 'ghosted', label: 'Ghosted', desc: 'They vanished mid-process.' },
+  { id: 'hired', label: 'Hired', desc: 'I got the job!' }
+];
+
+const SCOOP_TAGS = [
+  // Good
+  { id: 'straight_shooter', label: 'Straight Shooter', type: 'positive', desc: 'Honest about salary & remote work.' },
+  { id: 'feedback_loop', label: 'Feedback Loop', type: 'positive', desc: 'Gave me actual feedback.' },
+  { id: 'career_advocate', label: 'Career Advocate', type: 'positive', desc: 'Fought for my offer/terms.' },
+  // Bad
+  { id: 'radio_silence', label: 'Radio Silence', type: 'negative', desc: 'Ignored emails for weeks.' },
+  { id: 'role_baiting', label: 'Role Baiting', type: 'negative', desc: 'Job desc didn\'t match reality.' },
+  { id: 'time_waster', label: 'Time Waster', type: 'negative', desc: 'Process took way too long.' }
+];
+
 // 4. Main Application Component
 export default function App() {
   const [user, setUser] = useState(null);
@@ -203,6 +243,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Spam prevention state
   const [hasReviewed, setHasReviewed] = useState(false);
@@ -230,6 +271,7 @@ export default function App() {
   const handleSetView = (newView) => {
     setView(newView);
     setCaptchaVerified(false);
+    setMobileMenuOpen(false); // Close mobile menu on nav
     // Reset add form and spam check when moving views (except when moving to 'rate' from 'add')
     if (newView !== 'rate') {
       setAddRecruiterForm({ firstName: '', lastName: '', firm: '', location: '' });
@@ -244,9 +286,15 @@ export default function App() {
 
   useEffect(() => {
     const initAuth = async () => {
-      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        await signInWithCustomToken(auth, __initial_auth_token);
-      } else {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.warn("Custom token auth failed (likely mismatch), falling back to anonymous", err);
+        // Fallback to anonymous auth if the environment token doesn't match the project config
         await signInAnonymously(auth);
       }
     };
@@ -431,6 +479,49 @@ export default function App() {
     alert("Text copied to clipboard! Ready to paste into LinkedIn.");
   };
 
+  // --- Static Pages Renderers ---
+
+  const renderBlog = () => (
+    <div className="max-w-4xl mx-auto px-4 py-12">
+      <h1 className="text-4xl font-black mb-8">Intel Blog</h1>
+      <div className="grid gap-8">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-sm font-bold text-blue-600 mb-2">CAREER ADVICE</div>
+            <h2 className="text-2xl font-bold mb-3">How to Spot a "Ghoster" Before the First Call</h2>
+            <p className="text-gray-600 mb-4">Red flags are easy to spot if you know where to look. Here is the 5-point checklist...</p>
+            <button className="text-sm font-bold underline">Read Article</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderLegal = (type) => (
+    <div className="max-w-3xl mx-auto px-4 py-12 prose prose-blue">
+      <h1 className="text-3xl font-black mb-6">{type === 'privacy' ? 'Privacy Policy' : 'Terms of Use'}</h1>
+      <p className="lead text-xl text-gray-600 mb-8">
+        Last Updated: December 2025. Transparency is our core value, starting with how we handle your data.
+      </p>
+      
+      <h3 className="text-xl font-bold mb-2">1. The Basics</h3>
+      <p className="mb-6 text-gray-700">
+        RecruiterScoop is a public platform. Reviews you post are public. However, we protect your identity. 
+        We do not sell your personal email address to recruiters.
+      </p>
+
+      <h3 className="text-xl font-bold mb-2">2. Content Guidelines</h3>
+      <p className="mb-6 text-gray-700">
+        We reserve the right to remove content that violates our community standards, including hate speech, 
+        doxing, or verifiably false claims.
+      </p>
+      
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-500">
+        This is a placeholder legal document for the prototype. Please consult legal counsel for the production version.
+      </div>
+    </div>
+  );
+
   // --- Views ---
 
   const renderHome = () => (
@@ -483,7 +574,11 @@ export default function App() {
                 className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 p-4">
-                  <div className="bg-gray-50 text-gray-900 font-black text-xl px-3 py-1 rounded-lg border border-gray-100 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <div className={`font-black text-xl px-3 py-1 rounded-lg border border-gray-100 transition-colors ${
+                     (recruiter.rating || 0) >= 4 ? 'bg-green-50 text-green-700' :
+                     (recruiter.rating || 0) >= 3 ? 'bg-yellow-50 text-yellow-700' :
+                     'bg-gray-50 text-gray-900'
+                  }`}>
                     {recruiter.rating ? recruiter.rating.toFixed(1) : '-'}
                   </div>
                 </div>
@@ -758,7 +853,7 @@ export default function App() {
                    <div className="text-xs text-gray-500 mt-1">Leave another scoop</div>
                 </button>
                 <button 
-                   onClick={() => { handleSetView('home'); setSearchQuery(''); }}
+                   onClick={() => { handleSetView('headlines'); }}
                    className="p-4 rounded-xl border border-gray-200 hover:border-black hover:bg-gray-50 transition-all text-left group"
                 >
                    <div className="font-bold text-gray-900 group-hover:text-blue-600 flex items-center gap-2">
@@ -1027,17 +1122,15 @@ export default function App() {
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div 
             onClick={() => { handleSetView('home'); setSearchQuery(''); setSelectedRecruiter(null); }}
-            className="flex items-center gap-2 cursor-pointer group"
+            className="cursor-pointer hover:opacity-80 transition-opacity"
           >
-            <div className="bg-black text-white p-1.5 rounded-lg group-hover:rotate-12 transition-transform">
-              <Newspaper className="w-5 h-5 fill-white" />
-            </div>
-            <span className="font-black text-xl tracking-tight text-gray-900">RecruiterScoop</span>
+            <Logo />
           </div>
           
+          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-6 text-sm font-bold text-gray-600">
-            <a href="#" className="hover:text-black">Headline Recruiters</a>
-            <a href="#" className="hover:text-black">Intel Blog</a>
+            <button onClick={() => { handleSetView('home'); setSearchQuery(''); }} className="hover:text-black">Headline Recruiters</button>
+            <button onClick={() => handleSetView('blog')} className="hover:text-black">Intel Blog</button>
             <button 
               onClick={() => handleSetView('add')}
               className="text-black hover:text-blue-600"
@@ -1048,10 +1141,24 @@ export default function App() {
               Access Intel
             </button>
           </div>
-          <button className="md:hidden text-gray-900">
-            <Menu className="w-6 h-6" />
+          
+          {/* Mobile Nav Toggle */}
+          <button 
+            className="md:hidden text-gray-900"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 p-4 shadow-xl flex flex-col gap-4 text-center">
+            <button onClick={() => handleSetView('home')} className="font-bold text-gray-900 py-2">Headlines</button>
+            <button onClick={() => handleSetView('blog')} className="font-bold text-gray-900 py-2">Blog</button>
+            <button onClick={() => handleSetView('add')} className="font-bold text-blue-600 py-2">Add Profile</button>
+          </div>
+        )}
       </nav>
 
       <main className="pb-20">
@@ -1061,11 +1168,14 @@ export default function App() {
           </div>
         ) : (
           <>
-            {view === 'home' && renderHome()}
+            {(view === 'home' || view === 'headlines') && renderHome()}
             {view === 'recruiter' && selectedRecruiter && renderRecruiterProfile()}
             {view === 'rate' && selectedRecruiter && renderRateForm()}
             {view === 'add' && renderAddRecruiter()}
             {view === 'success' && renderSuccess()}
+            {view === 'blog' && renderBlog()}
+            {view === 'privacy' && renderLegal('privacy')}
+            {view === 'terms' && renderLegal('terms')}
           </>
         )}
       </main>
@@ -1073,8 +1183,8 @@ export default function App() {
       <footer className="bg-black text-gray-400 py-16 px-6">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12 text-sm">
           <div className="col-span-1 lg:col-span-2 pr-8">
-            <div className="flex items-center gap-2 text-white font-black text-2xl mb-6">
-              <Newspaper className="w-6 h-6" /> RecruiterScoop
+            <div className="mb-6">
+               <Logo className="w-6 h-6" textClassName="text-white text-2xl" />
             </div>
             <p className="leading-relaxed mb-6 text-gray-400">
               <strong className="text-white block mb-2">Don't fly blind. Get the Scoop.</strong>
@@ -1090,19 +1200,18 @@ export default function App() {
           <div>
             <h4 className="text-white font-bold mb-6 text-lg">Intel</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="hover:text-white transition-colors">Find Intel</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Submit a Scoop</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Headline Recruiters</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Fact-Checked Profiles</a></li>
+              <li><button onClick={() => { handleSetView('home'); setSearchQuery(''); }} className="hover:text-white transition-colors text-left">Find Intel</button></li>
+              <li><button onClick={() => handleSetView('add')} className="hover:text-white transition-colors text-left">Submit a Scoop</button></li>
+              <li><button onClick={() => handleSetView('home')} className="hover:text-white transition-colors text-left">Headline Recruiters</button></li>
+              <li><button onClick={() => handleSetView('blog')} className="hover:text-white transition-colors text-left">Intel Blog</button></li>
             </ul>
           </div>
           <div>
             <h4 className="text-white font-bold mb-6 text-lg">Legal & Trust</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="hover:text-white transition-colors">Posting Guidelines</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Use</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">DMCA Policy</a></li>
+              <li><button onClick={() => handleSetView('privacy')} className="hover:text-white transition-colors text-left">Privacy Policy</button></li>
+              <li><button onClick={() => handleSetView('terms')} className="hover:text-white transition-colors text-left">Terms of Use</button></li>
+              <li><button onClick={() => handleSetView('terms')} className="hover:text-white transition-colors text-left">DMCA Policy</button></li>
             </ul>
           </div>
         </div>
