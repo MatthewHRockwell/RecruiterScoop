@@ -379,6 +379,7 @@ export default function App() {
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userLocation, setUserLocation] = useState(null); // New location state
   
   // Share Modal State
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -427,7 +428,7 @@ export default function App() {
     window.scrollTo(0, 0);
   }, [view]);
 
-  // Auth & Fingerprint
+  // Auth & Fingerprint & Location
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -445,6 +446,18 @@ export default function App() {
     
     // Generate fingerprint
     setUserFingerprint(getBrowserFingerprint());
+
+    // Attempt Location Detection (Simple IP based)
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        if (data.city) {
+          setUserLocation(data.city);
+        }
+      })
+      .catch(err => {
+        console.log('Location detection failed/blocked, defaulting to global view.');
+      });
 
     const unsubscribe = onAuthStateChanged(auth, setUser);
     return () => unsubscribe();
@@ -669,7 +682,7 @@ export default function App() {
     }
   };
 
-  // Filter & Sort Logic
+  // Filter & Sort Logic for SEARCH (Search Results)
   const filteredRecruiters = useMemo(() => {
     const searchLower = searchQuery.toLowerCase();
     
@@ -679,19 +692,50 @@ export default function App() {
       r.firm?.toLowerCase().includes(searchLower)
     );
 
-    // Sort: Alphabetical first, then by Review Count (Popularity)
+    // Sort: Alphabetical first, then by Review Count
     return matches.sort((a, b) => {
-      // 1. Sort by Name Alphabetically
-      // Use "Hiring Team" string if name is empty for sorting comparison
       const nameA = a.name || "Hiring Team";
       const nameB = b.name || "Hiring Team";
       const nameCompare = nameA.localeCompare(nameB);
       if (nameCompare !== 0) return nameCompare;
-      
-      // 2. If names are identical, sort by number of reviews (Highest first) "Probability"
       return (b.reviewCount || 0) - (a.reviewCount || 0);
     });
   }, [recruiters, searchQuery]);
+
+  // Dashboard Data Logic (Top Recruiters & Top Teams)
+  const dashboardData = useMemo(() => {
+    if (searchQuery) return { recruiters: [], teams: [] };
+
+    // Function to calculate a ranking score
+    const ranker = (a, b) => {
+       // Prioritize Location first if available
+       if (userLocation) {
+         const aLoc = (a.location || '').toLowerCase();
+         const bLoc = (b.location || '').toLowerCase();
+         const loc = userLocation.toLowerCase();
+         const aIsLocal = aLoc.includes(loc);
+         const bIsLocal = bLoc.includes(loc);
+         
+         if (aIsLocal && !bIsLocal) return -1;
+         if (!aIsLocal && bIsLocal) return 1;
+       }
+       
+       // Secondary Sort: Rating weighted by Review Count
+       // Simple heuristic: Rating * log(ReviewCount + 1) to favor popular + high rated
+       const scoreA = (a.rating || 0) * Math.log((a.reviewCount || 0) + 1);
+       const scoreB = (b.rating || 0) * Math.log((b.reviewCount || 0) + 1);
+       return scoreB - scoreA;
+    };
+
+    // Separate Data
+    const namedRecruiters = recruiters.filter(r => r.name && r.name.trim() !== '');
+    const hiringTeams = recruiters.filter(r => !r.name || r.name.trim() === '');
+
+    return {
+      recruiters: namedRecruiters.sort(ranker).slice(0, 6), // Max 6 items (2 rows of 3)
+      teams: hiringTeams.sort(ranker).slice(0, 6)
+    };
+  }, [recruiters, userLocation, searchQuery]);
 
   // Determine if we should show the "Add Profile" view automatically
   // Show if there is a search query BUT no results
@@ -752,6 +796,39 @@ export default function App() {
 
   // --- Views ---
 
+  // Reusable Card Component to avoid duplication
+  const RecruiterCard = ({ recruiter }) => (
+    <div 
+      key={recruiter.id}
+      onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }}
+      className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden"
+    >
+      <div className="absolute top-0 right-0 p-4">
+        <div className={`font-black text-xl px-3 py-1 rounded-lg border border-gray-100 transition-colors ${
+            (recruiter.rating || 0) >= 4 ? 'bg-green-50 text-green-700' :
+            (recruiter.rating || 0) >= 3 ? 'bg-yellow-50 text-yellow-700' :
+            'bg-gray-50 text-gray-900'
+        }`}>
+          {recruiter.rating ? recruiter.rating.toFixed(1) : '-'}
+        </div>
+      </div>
+      <div className="pr-12">
+        <h3 className="font-bold text-lg text-gray-900 mb-1 leading-tight">{recruiter.name || "Hiring Team"}</h3>
+        <div className="text-gray-500 text-sm flex items-center gap-2 mb-4">
+          <Building className="w-3 h-3" /> {recruiter.firm}
+        </div>
+        {recruiter.roleTitle && (
+          <div className="flex items-center gap-2 text-xs font-bold text-blue-600 mb-4">
+            <Briefcase className="w-3 h-3" /> {recruiter.roleTitle}
+          </div>
+        )}
+        <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
+          <span>{recruiter.reviewCount || 0} {recruiter.reviewCount === 1 ? 'Review' : 'Reviews'}</span>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderHome = () => (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <div className="text-center max-w-2xl">
@@ -800,18 +877,20 @@ export default function App() {
       </div>
 
       <div className="w-full max-w-5xl">
-        <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
-          <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2">
-            <Newspaper className="w-5 h-5 text-blue-600" />
-            {showAutoAddProfile 
-              ? 'Creating Profile' 
-              : (searchQuery ? 'Search Results' : 'Headline Recruiters')
-            }
-          </h2>
-          {/* "Add Profile" button removed from here */}
-        </div>
+        {/* Only show Header row if searching */}
+        {searchQuery && (
+          <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
+            <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2">
+              <Newspaper className="w-5 h-5 text-blue-600" />
+              {showAutoAddProfile 
+                ? 'Creating Profile' 
+                : 'Search Results'
+              }
+            </h2>
+          </div>
+        )}
 
-        {/* Conditional Rendering: Grid vs Auto-Add Form */}
+        {/* Conditional Rendering: Dashboard vs Search vs Add */}
         {showAutoAddProfile ? (
           // --- AUTO ADD PROFILE MODE ---
           <div className="bg-white p-8 rounded-2xl shadow-xl border border-blue-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -884,40 +963,57 @@ export default function App() {
               </button>
             </form>
           </div>
-        ) : (
-          // --- STANDARD GRID MODE ---
+        ) : searchQuery ? (
+          // --- SEARCH RESULTS MODE ---
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredRecruiters.map(recruiter => (
-                <div 
-                  key={recruiter.id}
-                  onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }}
-                  className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden"
-                >
-                  <div className="absolute top-0 right-0 p-4">
-                    <div className={`font-black text-xl px-3 py-1 rounded-lg border border-gray-100 transition-colors ${
-                       (recruiter.rating || 0) >= 4 ? 'bg-green-50 text-green-700' :
-                       (recruiter.rating || 0) >= 3 ? 'bg-yellow-50 text-yellow-700' :
-                       'bg-gray-50 text-gray-900'
-                    }`}>
-                      {recruiter.rating ? recruiter.rating.toFixed(1) : '-'}
-                    </div>
-                  </div>
-                  <div className="pr-12">
-                    <h3 className="font-bold text-lg text-gray-900 mb-1 leading-tight">{recruiter.name || "Hiring Team"}</h3>
-                    <div className="text-gray-500 text-sm flex items-center gap-2 mb-4">
-                      <Building className="w-3 h-3" /> {recruiter.firm}
-                    </div>
-                    {recruiter.roleTitle && (
-                      <div className="flex items-center gap-2 text-xs font-bold text-blue-600 mb-4">
-                        <Briefcase className="w-3 h-3" /> {recruiter.roleTitle}
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                      <span>{recruiter.reviewCount || 0} {recruiter.reviewCount === 1 ? 'Review' : 'Reviews'}</span>
-                    </div>
-                  </div>
+            {filteredRecruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} />)}
+          </div>
+        ) : (
+          // --- DASHBOARD MODE (Top Recruiters & Top Teams) ---
+          <div className="space-y-12">
+            
+            {/* Top Recruiters Section */}
+            {dashboardData.recruiters.length > 0 && (
+              <div>
+                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
+                  <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2">
+                    <UserPlus className="w-5 h-5 text-blue-600" />
+                    Top Recruiters {userLocation ? `in ${userLocation}` : '(Global)'}
+                  </h2>
                 </div>
-              ))}
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {dashboardData.recruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} />)}
+                </div>
+              </div>
+            )}
+
+            {/* Top Hiring Teams Section */}
+            {dashboardData.teams.length > 0 && (
+              <div>
+                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
+                  <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2">
+                    <Building className="w-5 h-5 text-blue-600" />
+                    Top Hiring Teams {userLocation ? `in ${userLocation}` : '(Global)'}
+                  </h2>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {dashboardData.teams.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} />)}
+                </div>
+              </div>
+            )}
+
+            {/* Empty State / "Add One" Call to Action if no data */}
+            {dashboardData.recruiters.length === 0 && dashboardData.teams.length === 0 && (
+              <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                <p className="text-gray-500 mb-4 text-lg">No popular profiles found yet.</p>
+                <button 
+                  onClick={() => handleSetView('add')}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 shadow-lg"
+                >
+                  Be the first to add one
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
