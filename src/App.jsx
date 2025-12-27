@@ -43,7 +43,12 @@ import {
   Copy,
   ArrowRight,
   BookOpen,
-  FileText
+  FileText,
+  Linkedin,
+  Twitter,
+  Facebook,
+  Mail,
+  Link as LinkIcon
 } from 'lucide-react';
 
 // --- Components ---
@@ -83,6 +88,111 @@ const Logo = ({ className = "w-8 h-8", textClassName = "text-xl" }) => (
     </span>
   </div>
 );
+
+// Share Modal Component
+const ShareModal = ({ isOpen, onClose, shareText, isPositive }) => {
+  if (!isOpen) return null;
+
+  const url = "https://recruiterscoop.com";
+  const encodedText = encodeURIComponent(shareText);
+  const encodedUrl = encodeURIComponent(url);
+
+  const copyToClipboard = () => {
+    const el = document.createElement('textarea');
+    el.value = shareText;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    alert("Text copied to clipboard!");
+  };
+
+  const shareLinks = [
+    {
+      name: "LinkedIn",
+      icon: <Linkedin className="w-6 h-6 text-white" />,
+      bg: "bg-[#0077b5]",
+      href: `https://www.linkedin.com/feed/?shareActive=true&text=${encodedText}` 
+    },
+    {
+      name: "X (Twitter)",
+      icon: <Twitter className="w-6 h-6 text-white" />,
+      bg: "bg-black",
+      href: `https://twitter.com/intent/tweet?text=${encodedText}`
+    },
+    {
+      name: "Facebook",
+      icon: <Facebook className="w-6 h-6 text-white" />,
+      bg: "bg-[#1877f2]",
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`
+    },
+    {
+      name: "Email",
+      icon: <Mail className="w-6 h-6 text-white" />,
+      bg: "bg-gray-600",
+      href: `mailto:?subject=Review on RecruiterScoop&body=${encodedText}`
+    }
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
+        <div className="text-center mb-8">
+          <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${isPositive ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+            <Share2 className="w-8 h-8" />
+          </div>
+          <h2 className="text-2xl font-black text-gray-900">Spread the Word</h2>
+          <p className="text-gray-500 mt-2 text-sm">Choose a platform to share your intel.</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          {shareLinks.map((link) => (
+            <a
+              key={link.name}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${link.bg} p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-opacity group`}
+            >
+              <div className="group-hover:scale-110 transition-transform duration-200">
+                {link.icon}
+              </div>
+              <span className="text-white font-bold text-sm">{link.name}</span>
+            </a>
+          ))}
+        </div>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">or copy link manually</span>
+          </div>
+        </div>
+
+        <div className="mt-6 flex gap-2">
+          <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-600 truncate">
+            {url}
+          </div>
+          <button 
+            onClick={copyToClipboard}
+            className="bg-gray-900 text-white px-4 rounded-lg font-bold text-sm hover:bg-gray-800 transition-colors flex items-center gap-2"
+          >
+            <LinkIcon className="w-4 h-4" /> Copy
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // 1. Legal/Disclaimer Modal
 const GuidelinesModal = ({ isOpen, onClose, onAccept }) => {
@@ -245,6 +355,9 @@ export default function App() {
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
+  // Share Modal State
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  
   // Spam prevention state
   const [hasReviewed, setHasReviewed] = useState(false);
 
@@ -272,6 +385,7 @@ export default function App() {
     setView(newView);
     setCaptchaVerified(false);
     setMobileMenuOpen(false); // Close mobile menu on nav
+    setShareModalOpen(false); // Ensure modal is closed
     // Reset add form and spam check when moving views (except when moving to 'rate' from 'add')
     if (newView !== 'rate') {
       setAddRecruiterForm({ firstName: '', lastName: '', firm: '', location: '' });
@@ -468,16 +582,6 @@ export default function App() {
     r.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.firm?.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const copyToClipboard = (text) => {
-    const el = document.createElement('textarea');
-    el.value = text;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-    alert("Text copied to clipboard! Ready to paste into LinkedIn.");
-  };
 
   // --- Static Pages Renderers ---
 
@@ -773,7 +877,7 @@ export default function App() {
       headline: "Intel Received. 📂",
       emoji: "📂",
       body: "You're officially an insider. Thanks to you, the hiring market just got a little less opaque. We are processing your review now.",
-      primaryBtn: "Share Intel on LinkedIn",
+      primaryBtn: "Share Intel",
       shareText: `Just checked the intel on my recruiter at RecruiterScoop.com. Don't fly blind.`,
       secondaryLink: "Search for another recruiter"
     };
@@ -783,7 +887,7 @@ export default function App() {
         headline: "Review Secured.",
         emoji: "🚀",
         body: "Thanks for highlighting the good ones! The hiring industry needs more recruiters like that, and you just helped them stand out from the noise. Your review is now live.",
-        primaryBtn: "Share the Love on LinkedIn",
+        primaryBtn: "Share the Love",
         shareText: `Just gave my recruiter a glowing review on RecruiterScoop.com. Good recruiters deserve to be seen. Go check your grade!`,
         secondaryLink: "See who else is hiring"
       };
@@ -792,7 +896,7 @@ export default function App() {
         headline: "Loud and Clear.",
         emoji: "🛡️",
         body: "Thanks for speaking up. Transparency is the only way to fix broken hiring processes. Your review has been added to the database and will help future candidates dodge a bullet.",
-        primaryBtn: "Warn Your Network (Anonymously)",
+        primaryBtn: "Warn Your Network",
         shareText: `Hiring is tough enough without bad actors. I just dropped some honest intel on RecruiterScoop.com. Before you take that call, check the scoop.`,
         secondaryLink: "Read other horror stories"
       };
@@ -821,7 +925,7 @@ export default function App() {
 
           <div className="flex flex-col gap-4">
             <button 
-              onClick={() => copyToClipboard(content.shareText)}
+              onClick={() => setShareModalOpen(true)}
               className={`w-full py-4 rounded-xl font-bold text-lg text-white shadow-lg flex items-center justify-center gap-2 transition-transform hover:-translate-y-1 ${
                 isPositive ? 'bg-green-600 hover:bg-green-700' : 
                 isNegative ? 'bg-red-600 hover:bg-red-700' : 
@@ -838,6 +942,14 @@ export default function App() {
               {content.secondaryLink}
             </button>
           </div>
+
+          {/* Share Modal */}
+          <ShareModal 
+            isOpen={shareModalOpen} 
+            onClose={() => setShareModalOpen(false)} 
+            shareText={content.shareText}
+            isPositive={isPositive}
+          />
 
           {/* The Loop Section */}
           <div className="mt-12 pt-8 border-t border-gray-100">
