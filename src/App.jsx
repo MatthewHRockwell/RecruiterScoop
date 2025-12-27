@@ -483,7 +483,7 @@ export default function App() {
 
   const renderBlog = () => (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-black mb-8">Intel Blog</h1>
+      <h1 className="text-3xl md:text-4xl font-black mb-8">Intel Blog</h1>
       <div className="grid gap-8">
         {[1, 2, 3].map(i => (
           <div key={i} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
@@ -499,8 +499,8 @@ export default function App() {
 
   const renderLegal = (type) => (
     <div className="max-w-3xl mx-auto px-4 py-12 prose prose-blue">
-      <h1 className="text-3xl font-black mb-6">{type === 'privacy' ? 'Privacy Policy' : 'Terms of Use'}</h1>
-      <p className="lead text-xl text-gray-600 mb-8">
+      <h1 className="text-2xl md:text-3xl font-black mb-6">{type === 'privacy' ? 'Privacy Policy' : 'Terms of Use'}</h1>
+      <p className="lead text-lg md:text-xl text-gray-600 mb-8">
         Last Updated: December 2025. Transparency is our core value, starting with how we handle your data.
       </p>
       
@@ -532,10 +532,10 @@ export default function App() {
               <Newspaper className="w-8 h-8" />
            </div>
         </div>
-        <h1 className="text-6xl font-black text-gray-900 mb-6 tracking-tight leading-tight">
+        <h1 className="text-4xl md:text-6xl font-black text-gray-900 mb-6 tracking-tight leading-tight">
           Recruiter<span className="text-blue-600">Scoop</span>
         </h1>
-        <p className="text-2xl text-gray-600 mb-10 font-light">
+        <p className="text-xl md:text-2xl text-gray-600 mb-10 font-light">
           Get the <span className="font-bold text-gray-900">inside scoop</span> on your next recruiter.
         </p>
         
@@ -620,7 +620,7 @@ export default function App() {
         <div className="absolute top-0 left-0 w-2 h-full bg-blue-600"></div>
         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
           <div>
-            <h1 className="text-4xl font-black text-gray-900 mb-2">{selectedRecruiter.name}</h1>
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">{selectedRecruiter.name}</h1>
             <div className="flex flex-col gap-2 text-lg text-gray-600">
               <span className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-gray-400" /> {selectedRecruiter.firm}</span>
               <span className="flex items-center gap-2"><MapPin className="w-5 h-5 text-gray-400" /> {selectedRecruiter.location || 'Location Not Listed'}</span>
@@ -632,7 +632,7 @@ export default function App() {
                 <div className="text-sm font-bold text-gray-400 uppercase tracking-wider">Overall Verdict</div>
                 <div className="text-xs text-gray-400">Based on {selectedRecruiter.reviewCount || 0} scoops</div>
              </div>
-             <div className={`text-6xl font-black tracking-tighter ${
+             <div className={`text-5xl md:text-6xl font-black tracking-tighter ${
                 selectedRecruiter.rating >= 4 ? 'text-green-500' : 
                 selectedRecruiter.rating >= 3 ? 'text-yellow-500' : 
                 'text-gray-300'
@@ -1057,7 +1057,7 @@ export default function App() {
         </h2>
         <form onSubmit={handleAddRecruiter} className="space-y-4">
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1">First Name <span className="text-red-500">*</span></label>
               <input 
