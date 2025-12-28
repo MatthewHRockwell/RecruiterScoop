@@ -54,7 +54,8 @@ import {
   Eye,
   FileCheck,
   Scale,
-  Award
+  Award,
+  Clock
 } from 'lucide-react';
 
 // --- Utilities ---
@@ -75,250 +76,147 @@ const getBrowserFingerprint = () => {
 
 // --- Components ---
 
-// eView Logo Component
 const Logo = ({ className = "w-8 h-8", textClassName = "text-xl", showText = true }) => (
   <div className="flex items-center gap-2 select-none">
     <div className="relative">
-      <svg 
-        viewBox="0 0 100 100" 
-        className={className} 
-        fill="none" 
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* The 'e' / Eye Shape */}
-        <path 
-          d="M50 15C30 15 12 30 5 50C12 70 30 85 50 85C70 85 88 70 95 50C88 30 70 15 50 15ZM50 75C36.19 75 25 63.81 25 50C25 36.19 36.19 25 50 25C63.81 25 75 36.19 75 50C75 63.81 63.81 75 50 75Z" 
-          className="fill-black"
-        />
-        {/* The Checkmark / Pupil */}
-        <path 
-          d="M45 60L35 50L40 45L45 50L60 35L65 40L45 60Z" 
-          fill="#2563EB" // Blue-600
-        />
+      <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 15C30 15 12 30 5 50C12 70 30 85 50 85C70 85 88 70 95 50C88 30 70 15 50 15ZM50 75C36.19 75 25 63.81 25 50C25 36.19 36.19 25 50 25C63.81 25 75 36.19 75 50C75 63.81 63.81 75 50 75Z" className="fill-black" />
+        <path d="M45 60L35 50L40 45L45 50L60 35L65 40L45 60Z" fill="#2563EB" />
       </svg>
     </div>
-    {showText && (
-      <span className={`font-black tracking-tight text-gray-900 ${textClassName}`}>
-        e<span className="text-blue-600">View</span>
-      </span>
-    )}
+    {showText && <span className={`font-black tracking-tight text-gray-900 ${textClassName}`}>e<span className="text-blue-600">View</span></span>}
   </div>
 );
 
-// Share Modal Component
 const ShareModal = ({ isOpen, onClose, shareText, isPositive }) => {
   if (!isOpen) return null;
-
-  const url = "https://reviewereview.com"; // Updated Domain
+  const url = "https://reviewereview.com"; 
   const encodedText = encodeURIComponent(shareText);
   const encodedUrl = encodeURIComponent(url);
-
   const copyToClipboard = () => {
-    const el = document.createElement('textarea');
-    el.value = shareText;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-    alert("Text copied to clipboard!");
+    const el = document.createElement('textarea'); el.value = shareText; document.body.appendChild(el);
+    el.select(); document.execCommand('copy'); document.body.removeChild(el); alert("Text copied to clipboard!");
   };
-
   const shareLinks = [
-    {
-      name: "LinkedIn",
-      icon: <Linkedin className="w-6 h-6 text-white" />,
-      bg: "bg-[#0077b5]",
-      href: `https://www.linkedin.com/feed/?shareActive=true&text=${encodedText}` 
-    },
-    {
-      name: "X (Twitter)",
-      icon: <Twitter className="w-6 h-6 text-white" />,
-      bg: "bg-black",
-      href: `https://twitter.com/intent/tweet?text=${encodedText}`
-    },
-    {
-      name: "Facebook",
-      icon: <Facebook className="w-6 h-6 text-white" />,
-      bg: "bg-[#1877f2]",
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`
-    },
-    {
-      name: "Email",
-      icon: <Mail className="w-6 h-6 text-white" />,
-      bg: "bg-gray-600",
-      href: `mailto:?subject=Review on eView&body=${encodedText}`
-    }
+    { name: "LinkedIn", icon: <Linkedin className="w-6 h-6 text-white" />, bg: "bg-[#0077b5]", href: `https://www.linkedin.com/feed/?shareActive=true&text=${encodedText}` },
+    { name: "X (Twitter)", icon: <Twitter className="w-6 h-6 text-white" />, bg: "bg-black", href: `https://twitter.com/intent/tweet?text=${encodedText}` },
+    { name: "Facebook", icon: <Facebook className="w-6 h-6 text-white" />, bg: "bg-[#1877f2]", href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}` },
+    { name: "Email", icon: <Mail className="w-6 h-6 text-white" />, bg: "bg-gray-600", href: `mailto:?subject=Review on eView&body=${encodedText}` }
   ];
-
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-        <button 
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <X className="w-6 h-6" />
-        </button>
-
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-6 h-6" /></button>
         <div className="text-center mb-8">
-          <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${isPositive ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
-            <Share2 className="w-8 h-8" />
-          </div>
+          <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${isPositive ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}><Share2 className="w-8 h-8" /></div>
           <h2 className="text-2xl font-black text-gray-900">Share the eView</h2>
           <p className="text-gray-500 mt-2 text-sm">Help others optimize their hiring process.</p>
         </div>
-
         <div className="grid grid-cols-2 gap-4 mb-6">
           {shareLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${link.bg} p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-opacity group`}
-            >
-              <div className="group-hover:scale-110 transition-transform duration-200">
-                {link.icon}
-              </div>
-              <span className="text-white font-bold text-sm">{link.name}</span>
+            <a key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" className={`${link.bg} p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-opacity group`}>
+              <div className="group-hover:scale-110 transition-transform duration-200">{link.icon}</div><span className="text-white font-bold text-sm">{link.name}</span>
             </a>
           ))}
         </div>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">or copy link manually</span>
-          </div>
-        </div>
-
+        <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div><div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-500">or copy link manually</span></div></div>
         <div className="mt-6 flex gap-2">
-          <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-600 truncate">
-            {url}
-          </div>
-          <button 
-            onClick={copyToClipboard}
-            className="bg-gray-900 text-white px-4 rounded-lg font-bold text-sm hover:bg-gray-800 transition-colors flex items-center gap-2"
-          >
-            <LinkIcon className="w-4 h-4" /> Copy
-          </button>
+          <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-600 truncate">{url}</div>
+          <button onClick={copyToClipboard} className="bg-gray-900 text-white px-4 rounded-lg font-bold text-sm hover:bg-gray-800 transition-colors flex items-center gap-2"><LinkIcon className="w-4 h-4" /> Copy</button>
         </div>
       </div>
     </div>
   );
 };
 
-// 1. Legal/Disclaimer Modal (Updated for Professional Standards)
 const GuidelinesModal = ({ isOpen, onClose, onAccept }) => {
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-lg w-full p-6 shadow-xl border-t-4 border-blue-600">
-        <div className="flex items-center gap-2 mb-4 text-gray-900">
-          <Scale className="w-6 h-6 text-blue-600" />
-          <h2 className="text-xl font-bold">Review Standards</h2>
-        </div>
-        <p className="text-gray-600 mb-4 text-sm">
-          eView is a professional accountability utility, not a venting board. 
-          To maintain legal defensibility and data quality:
-        </p>
+        <div className="flex items-center gap-2 mb-4 text-gray-900"><Scale className="w-6 h-6 text-blue-600" /><h2 className="text-xl font-bold">Review Standards</h2></div>
+        <p className="text-gray-600 mb-4 text-sm">eView is a professional accountability utility. To maintain data quality:</p>
         <ul className="space-y-3 mb-6 text-sm text-gray-700">
-          <li className="flex gap-2">
-            <Check className="w-4 h-4 text-green-500 shrink-0" />
-            <span><strong>Focus on Process:</strong> Rate based on milestones (e.g., salary disclosure, feedback timing).</span>
-          </li>
-          <li className="flex gap-2">
-            <Check className="w-4 h-4 text-green-500 shrink-0" />
-            <span><strong>Be Objective:</strong> Avoid emotional language. Stick to what happened.</span>
-          </li>
-          <li className="flex gap-2">
-            <Shield className="w-4 h-4 text-blue-500 shrink-0" />
-            <span><strong>Verifiable:</strong> You affirm that you have evidence of this interaction (email/screenshot) if requested.</span>
-          </li>
+          <li className="flex gap-2"><Check className="w-4 h-4 text-green-500 shrink-0" /><span><strong>Focus on Process:</strong> Rate based on milestones.</span></li>
+          <li className="flex gap-2"><Check className="w-4 h-4 text-green-500 shrink-0" /><span><strong>Be Objective:</strong> Avoid emotional language.</span></li>
+          <li className="flex gap-2"><Shield className="w-4 h-4 text-blue-500 shrink-0" /><span><strong>Verifiable:</strong> You affirm you have evidence if requested.</span></li>
         </ul>
         <div className="flex justify-end gap-3">
           <button onClick={onClose} className="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-md">Cancel</button>
-          <button 
-            onClick={onAccept}
-            className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium"
-          >
-            Accept Standards
-          </button>
+          <button onClick={onAccept} className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium">Accept Standards</button>
         </div>
       </div>
     </div>
   );
 };
 
-// 2. Star Rating Input
 const StarRating = ({ rating, setRating, interactive = true, size = "md" }) => {
   const sizeClasses = size === "lg" ? "w-8 h-8" : "w-5 h-5";
-  
   return (
     <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          disabled={!interactive}
-          onClick={() => interactive && setRating(star)}
-          className={`focus:outline-none transition-transform ${interactive ? 'hover:scale-110' : 'cursor-default'}`}
-        >
-          <Star 
-            className={`${sizeClasses} ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} 
-            fill={star <= rating ? "currentColor" : "none"}
-          />
+        <button key={star} type="button" disabled={!interactive} onClick={() => interactive && setRating(star)} className={`focus:outline-none transition-transform ${interactive ? 'hover:scale-110' : 'cursor-default'}`}>
+          <Star className={`${sizeClasses} ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} fill={star <= rating ? "currentColor" : "none"} />
         </button>
       ))}
     </div>
   );
 };
 
-// 3. Captcha Component
 const Captcha = ({ onVerify }) => {
   const [num1] = useState(Math.floor(Math.random() * 10) + 1);
   const [num2] = useState(Math.floor(Math.random() * 10) + 1);
   const [val, setVal] = useState('');
-
   const handleChange = (e) => {
     const input = e.target.value;
     if (!/^\d*$/.test(input)) return;
     setVal(input);
-    if (parseInt(input) === num1 + num2) {
-      onVerify(true);
-    } else {
-      onVerify(false);
-    }
+    if (parseInt(input) === num1 + num2) { onVerify(true); } else { onVerify(false); }
   };
-
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 mt-4">
-      <div className="flex items-center gap-2">
-        <Lock className="w-4 h-4 text-gray-400" />
-        <span className="text-sm font-bold text-gray-600 uppercase tracking-wide">Human Check</span>
-      </div>
+      <div className="flex items-center gap-2"><Lock className="w-4 h-4 text-gray-400" /><span className="text-sm font-bold text-gray-600 uppercase tracking-wide">Human Check</span></div>
       <div className="flex items-center gap-3">
-        <div className="bg-white px-4 py-2 rounded-lg border border-gray-300 font-mono font-bold text-gray-800 select-none shadow-sm">
-          {num1} + {num2} = ?
-        </div>
-        <input
-          type="text"
-          inputMode="numeric"
-          value={val}
-          onChange={handleChange}
-          placeholder="Sum"
-          className="w-24 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-center font-bold text-gray-800"
-        />
+        <div className="bg-white px-4 py-2 rounded-lg border border-gray-300 font-mono font-bold text-gray-800 select-none shadow-sm">{num1} + {num2} = ?</div>
+        <input type="text" inputMode="numeric" value={val} onChange={handleChange} placeholder="Sum" className="w-24 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-center font-bold text-gray-800" />
         {parseInt(val) === num1 + num2 && <Shield className="w-6 h-6 text-green-500 animate-bounce" />}
       </div>
     </div>
   );
 };
 
-// --- Configuration & Initialization ---
+// Reusable Card Component (Moved outside to prevent scoping errors)
+const RecruiterCard = ({ recruiter, onClick }) => {
+  const isVerified = (recruiter.rating >= 4.5) && (recruiter.reviewCount >= 5);
+  const getDateString = () => {
+    if (!recruiter.lastReviewed) return '';
+    return new Date(recruiter.lastReviewed.seconds * 1000).toLocaleDateString();
+  };
+  return (
+    <div onClick={onClick} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden">
+      <div className="absolute top-0 right-0 p-4 flex flex-col items-end gap-2">
+        <div className={`font-black text-xl px-3 py-1 rounded-lg border border-gray-100 transition-colors ${ (recruiter.rating || 0) >= 4 ? 'bg-green-50 text-green-700' : (recruiter.rating || 0) >= 3 ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-50 text-gray-900' }`}>
+          {recruiter.rating ? recruiter.rating.toFixed(1) : '-'}
+        </div>
+        {isVerified && <div className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1"><Award className="w-3 h-3" /> VERIFIED</div>}
+      </div>
+      <div className="pr-12">
+        <h3 className="font-bold text-lg text-gray-900 mb-1 leading-tight">{recruiter.name || "Hiring Team"}</h3>
+        <div className="text-gray-500 text-sm flex items-center gap-2 mb-2"><Building className="w-3 h-3" /> {recruiter.firm}</div>
+        <div className="flex flex-col gap-1">
+            {recruiter.location && <div className="flex items-center gap-2 text-xs text-gray-400"><MapPin className="w-3 h-3" /> {recruiter.location}</div>}
+            {recruiter.lastReviewed && <div className="flex items-center gap-2 text-xs text-gray-400"><Clock className="w-3 h-3" /> {getDateString()}</div>}
+        </div>
+        <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
+            {recruiter.roleTitle && <div className="flex items-center gap-2 text-xs font-bold text-blue-600"><Briefcase className="w-3 h-3" /> {recruiter.roleTitle}</div>}
+            <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider"><span>{recruiter.reviewCount || 0} {recruiter.reviewCount === 1 ? 'Review' : 'Reviews'}</span></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- Configuration ---
 
 const firebaseConfig = {
   apiKey: "AIzaSyDCmNjPM2avnmrw9qOGB_7S7zG4l0AuHqc",
@@ -330,14 +228,11 @@ const firebaseConfig = {
   measurementId: "G-8PD21B2XYQ"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const analytics = getAnalytics(app);
 const appId = 'recruiter-scoop';
-
-// --- Constants & Data ---
 
 const STAGES = [
   { id: 'initial', label: 'Initial Chat', desc: 'Screening call.' },
@@ -347,23 +242,19 @@ const STAGES = [
   { id: 'offer', label: 'Offer Stage', desc: 'Salary/Terms negotiation.' }
 ];
 
-// OBJECTIVE METRICS ("Governance" over "Gossip")
 const SCOOP_TAGS = [
-  // Process Wins (Positive)
   { id: 'salary_transparency', label: 'Salary Provided', type: 'positive', desc: 'Range disclosed in first interaction.' },
   { id: 'timely_feedback', label: 'Timely Feedback', type: 'positive', desc: 'Updates provided within 48h.' },
   { id: 'accurate_role', label: 'Accurate Role', type: 'positive', desc: 'Job matched description perfectly.' },
-  // Process Gaps (Negative)
   { id: 'ghosted', label: 'Process Ghosting', type: 'negative', desc: 'Communication ceased without closure.' },
   { id: 'late_feedback', label: 'Delayed Feedback', type: 'negative', desc: 'Wait times exceeded promises.' },
   { id: 'misleading', label: 'Misleading Info', type: 'negative', desc: 'Role/Salary changed during process.' },
-  // Safety/Critical
   { id: 'fake_listing', label: 'Ghost/Fake Job', type: 'critical', desc: 'Position does not exist.' },
   { id: 'pay_to_play', label: 'Pay to Play/MLM', type: 'critical', desc: 'Required payment or recruitment.' },
   { id: 'data_mining', label: 'Data Mining', type: 'critical', desc: 'Excessive PII requested early.' }
 ];
 
-// 4. Main Application Component
+// --- MAIN APP ---
 export default function App() {
   const [user, setUser] = useState(null);
   const [view, setView] = useState('home'); 
@@ -381,23 +272,11 @@ export default function App() {
   const [userFingerprint, setUserFingerprint] = useState('');
   const [submittedReview, setSubmittedReview] = useState(null);
 
-  // New Rate Form State
   const [rateForm, setRateForm] = useState({
-    stage: '',         
-    tags: [],          
-    headline: '',      
-    comment: '',       
-    rating: 0,         
-    agreed: false,
-    verified: false // New "I have proof" toggle
+    stage: '', tags: [], headline: '', comment: '', rating: 0, agreed: false, verified: false
   });
-
   const [addRecruiterForm, setAddRecruiterForm] = useState({
-    firstName: '',
-    lastName: '',
-    firm: '',
-    location: '',
-    roleTitle: ''
+    firstName: '', lastName: '', firm: '', location: '', roleTitle: ''
   });
 
   const handleSetView = (newView) => {
@@ -411,12 +290,8 @@ export default function App() {
     }
   };
 
-  // Scroll to top
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [view]);
+  useEffect(() => { window.scrollTo(0, 0); }, [view]);
 
-  // Auth & Fingerprint & Location
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -425,18 +300,13 @@ export default function App() {
         } else {
           await signInAnonymously(auth);
         }
-      } catch (err) {
-        await signInAnonymously(auth);
-      }
+      } catch (err) { await signInAnonymously(auth); }
     };
     initAuth();
     setUserFingerprint(getBrowserFingerprint());
-
-    fetch('https://ipapi.co/json/')
-      .then(res => res.json())
+    fetch('https://ipapi.co/json/').then(res => res.json())
       .then(data => { if (data.city) setUserLocation(data.city); })
       .catch(() => console.log('Location default: Global'));
-
     const unsubscribe = onAuthStateChanged(auth, setUser);
     return () => unsubscribe();
   }, []);
@@ -454,33 +324,24 @@ export default function App() {
   useEffect(() => {
     if (selectedRecruiter && recruiters.length > 0) {
        const liveRecord = recruiters.find(r => r.id === selectedRecruiter.id);
-       if (liveRecord) {
-         if (liveRecord.rating !== selectedRecruiter.rating || liveRecord.reviewCount !== selectedRecruiter.reviewCount) {
-           setSelectedRecruiter(prev => ({...prev, ...liveRecord}));
-         }
+       if (liveRecord && (liveRecord.rating !== selectedRecruiter.rating || liveRecord.reviewCount !== selectedRecruiter.reviewCount)) {
+         setSelectedRecruiter(prev => ({...prev, ...liveRecord}));
        }
     }
-  }, [recruiters]); 
+  }, [recruiters, selectedRecruiter]); 
 
   useEffect(() => {
     if (!user || !selectedRecruiter) return;
     if (selectedRecruiter.id === 'temp_new_recruiter') {
-      setReviews([]);
-      setHasReviewed(false);
-      return;
+      setReviews([]); setHasReviewed(false); return;
     }
-
     const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'reviews'));
     return onSnapshot(q, (snapshot) => {
       const allReviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const relatedReviews = allReviews
-        .filter(r => r.recruiterId === selectedRecruiter.id)
+      const related = allReviews.filter(r => r.recruiterId === selectedRecruiter.id)
         .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-      
-      setReviews(relatedReviews);
-      const myReview = relatedReviews.find(r => 
-        r.authorId === user.uid || (r.fingerprint && r.fingerprint === userFingerprint)
-      );
+      setReviews(related);
+      const myReview = related.find(r => r.authorId === user.uid || (r.fingerprint && r.fingerprint === userFingerprint));
       setHasReviewed(!!myReview);
     }, console.error);
   }, [user, selectedRecruiter, userFingerprint]);
@@ -488,9 +349,7 @@ export default function App() {
   const handleAddRecruiter = (e) => {
     e.preventDefault();
     if (!addRecruiterForm.firm || !addRecruiterForm.roleTitle) return;
-
     const hasName = addRecruiterForm.firstName || addRecruiterForm.lastName;
-
     setSelectedRecruiter({
       id: 'temp_new_recruiter',
       name: hasName ? `${addRecruiterForm.firstName} ${addRecruiterForm.lastName}`.trim() : '',
@@ -500,13 +359,11 @@ export default function App() {
       rating: 0,
       reviewCount: 0
     });
-    
     handleSetView('rate');
   };
 
   const handleSubmitReview = async () => {
     if (!selectedRecruiter || !captchaVerified || rateForm.rating === 0 || !rateForm.agreed) return;
-
     try {
       let finalRecruiterId = selectedRecruiter.id;
       let finalRecruiterName = selectedRecruiter.name;
@@ -514,75 +371,34 @@ export default function App() {
 
       if (selectedRecruiter.id === 'temp_new_recruiter') {
          const newRecruiterData = {
-            name: selectedRecruiter.name,
-            firm: selectedRecruiter.firm,
-            location: selectedRecruiter.location,
-            roleTitle: selectedRecruiter.roleTitle || '',
-            rating: 0,
-            reviewCount: 0,
-            createdAt: serverTimestamp(),
-            tags: {}
+            name: selectedRecruiter.name, firm: selectedRecruiter.firm, location: selectedRecruiter.location,
+            roleTitle: selectedRecruiter.roleTitle || '', rating: 0, reviewCount: 0, createdAt: serverTimestamp(), tags: {}
          };
          const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'recruiters'), newRecruiterData);
          finalRecruiterId = docRef.id;
       }
-
       await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'reviews'), {
-        recruiterId: finalRecruiterId,
-        stage: rateForm.stage,
-        tags: rateForm.tags,
-        headline: rateForm.headline,
-        comment: rateForm.comment,
-        rating: rateForm.rating, 
-        authorId: user.uid,
-        fingerprint: userFingerprint,
-        verified: rateForm.verified,
-        timestamp: serverTimestamp(),
-        flags: 0
+        recruiterId: finalRecruiterId, stage: rateForm.stage, tags: rateForm.tags, headline: rateForm.headline,
+        comment: rateForm.comment, rating: rateForm.rating, authorId: user.uid, fingerprint: userFingerprint,
+        verified: rateForm.verified, timestamp: serverTimestamp(), flags: 0
       });
-
       const currentCount = selectedRecruiter.id === 'temp_new_recruiter' ? 0 : (selectedRecruiter.reviewCount || 0);
       const currentRating = selectedRecruiter.id === 'temp_new_recruiter' ? 0 : (selectedRecruiter.rating || 0);
-      
       const newCount = currentCount + 1;
-      const currentTotal = currentRating * currentCount;
-      const newAverage = (currentTotal + rateForm.rating) / newCount;
-
-      const recruiterRef = doc(db, 'artifacts', appId, 'public', 'data', 'recruiters', finalRecruiterId);
-      await updateDoc(recruiterRef, {
-        rating: newAverage,
-        reviewCount: increment(1)
+      const newAverage = (currentRating * currentCount + rateForm.rating) / newCount;
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'recruiters', finalRecruiterId), {
+        rating: newAverage, reviewCount: increment(1), lastReviewed: serverTimestamp()
       });
-
-      setSubmittedReview({
-        rating: rateForm.rating,
-        headline: rateForm.headline,
-        recruiterName: finalRecruiterName || 'Hiring Team',
-        firm: finalRecruiterFirm
-      });
-
-      setRateForm({ 
-        stage: '',
-        tags: [], 
-        headline: '',
-        comment: '', 
-        rating: 0,
-        agreed: false,
-        verified: false
-      });
-
+      setSubmittedReview({ rating: rateForm.rating, headline: rateForm.headline, recruiterName: finalRecruiterName || 'Hiring Team', firm: finalRecruiterFirm });
+      setRateForm({ stage: '', tags: [], headline: '', comment: '', rating: 0, agreed: false, verified: false });
       handleSetView('success');
-
-    } catch (err) {
-      console.error("Error submitting review:", err);
-    }
+    } catch (err) { console.error("Error submitting review:", err); }
   };
 
   const handleFlagReview = async (reviewId, currentFlags) => {
     try {
-      const reviewRef = doc(db, 'artifacts', appId, 'public', 'data', 'reviews', reviewId);
-      await updateDoc(reviewRef, { flags: (currentFlags || 0) + 1 });
-      alert("This Review has been flagged for moderation. Thanks for keeping the intel verified.");
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reviews', reviewId), { flags: (currentFlags || 0) + 1 });
+      alert("This Review has been flagged for moderation.");
     } catch (err) { console.error(err); }
   };
 
@@ -590,18 +406,13 @@ export default function App() {
     setRateForm(prev => {
       const isCritical = SCOOP_TAGS.find(t => t.id === tagId)?.type === 'critical';
       const isAdding = !prev.tags.includes(tagId);
-      
-      const tags = isAdding
-        ? [...prev.tags, tagId]
-        : prev.tags.filter(t => t !== tagId);
-      
+      const tags = isAdding ? [...prev.tags, tagId] : prev.tags.filter(t => t !== tagId);
       let rating = prev.rating;
       if (isAdding && isCritical) rating = 1;
       return { ...prev, tags, rating };
     });
   };
 
-  // Autocomplete
   const bestMatch = useMemo(() => {
     if (!searchQuery || searchQuery.length < 2) return null;
     const searchLower = searchQuery.toLowerCase();
@@ -618,22 +429,14 @@ export default function App() {
     if (e.key === 'Enter') {
       e.preventDefault();
       const exactMatch = recruiters.find(r => r.name?.toLowerCase() === searchQuery.toLowerCase());
-      if (exactMatch) {
-        setSelectedRecruiter(exactMatch);
-        handleSetView('recruiter');
-      } else if (bestMatch && bestMatch.name.toLowerCase() === searchQuery.toLowerCase()) {
-        setSelectedRecruiter(bestMatch);
-        handleSetView('recruiter');
-      }
+      if (exactMatch) { setSelectedRecruiter(exactMatch); handleSetView('recruiter'); }
+      else if (bestMatch && bestMatch.name.toLowerCase() === searchQuery.toLowerCase()) { setSelectedRecruiter(bestMatch); handleSetView('recruiter'); }
     }
   };
 
   const filteredRecruiters = useMemo(() => {
     const searchLower = searchQuery.toLowerCase();
-    const matches = recruiters.filter(r => 
-      r.name?.toLowerCase().includes(searchLower) ||
-      r.firm?.toLowerCase().includes(searchLower)
-    );
+    const matches = recruiters.filter(r => r.name?.toLowerCase().includes(searchLower) || r.firm?.toLowerCase().includes(searchLower));
     return matches.sort((a, b) => {
       const nameA = a.name || "Hiring Team";
       const nameB = b.name || "Hiring Team";
@@ -643,7 +446,6 @@ export default function App() {
     });
   }, [recruiters, searchQuery]);
 
-  // Dashboard Logic
   const dashboardData = useMemo(() => {
     if (searchQuery) return { recruiters: [], teams: [] };
     const ranker = (a, b) => {
@@ -662,64 +464,122 @@ export default function App() {
     };
     const namedRecruiters = recruiters.filter(r => r.name && r.name.trim() !== '');
     const hiringTeams = recruiters.filter(r => !r.name || r.name.trim() === '');
-    return {
-      recruiters: namedRecruiters.sort(ranker).slice(0, 6),
-      teams: hiringTeams.sort(ranker).slice(0, 6)
-    };
+    return { recruiters: namedRecruiters.sort(ranker).slice(0, 6), teams: hiringTeams.sort(ranker).slice(0, 6) };
   }, [recruiters, userLocation, searchQuery]);
 
   const showAutoAddProfile = searchQuery.length > 0 && filteredRecruiters.length === 0;
 
   const copyToClipboard = (text) => {
-    const el = document.createElement('textarea');
-    el.value = text;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-    alert("Text copied to clipboard!");
+    const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el);
+    el.select(); document.execCommand('copy'); document.body.removeChild(el); alert("Text copied!");
   };
 
-  // --- Views ---
+  // --- Render Functions ---
+  const renderBlog = () => (
+    <div className="max-w-4xl mx-auto px-4 py-12">
+      <h1 className="text-3xl md:text-4xl font-black mb-8">Intel Blog</h1>
+      <div className="grid gap-8">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-sm font-bold text-blue-600 mb-2">CAREER ADVICE</div>
+            <h2 className="text-2xl font-bold mb-3">How to Spot a "Ghoster" Before the First Call</h2>
+            <p className="text-gray-600 mb-4">Red flags are easy to spot if you know where to look. Here is the 5-point checklist...</p>
+            <button className="text-sm font-bold underline">Read Article</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
-  // Reusable Card Component
-  const RecruiterCard = ({ recruiter }) => {
-    // "eView Verified" Logic: > 4.5 Stars AND > 5 Reviews
-    const isVerified = (recruiter.rating >= 4.5) && (recruiter.reviewCount >= 5);
+  const renderLegal = (type) => (
+    <div className="max-w-3xl mx-auto px-4 py-12 prose prose-blue">
+      <h1 className="text-2xl md:text-3xl font-black mb-6">{type === 'privacy' ? 'Privacy Policy' : 'Terms of Use'}</h1>
+      <p className="lead text-lg md:text-xl text-gray-600 mb-8">Last Updated: December 2025.</p>
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-500">This is a placeholder legal document for the prototype.</div>
+    </div>
+  );
 
+  const renderAddRecruiter = () => (
+    <div className="max-w-xl mx-auto px-4 py-8">
+       <button onClick={() => handleSetView('home')} className="mb-6 text-gray-500 hover:text-gray-900 flex items-center gap-1 text-sm font-medium"><ChevronRight className="w-4 h-4 rotate-180" /> Back</button>
+      <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+        <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2"><UserPlus className="w-6 h-6 text-blue-600" /> Add Profile</h2>
+        <form onSubmit={handleAddRecruiter} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">Reviewer First Name <span className="text-gray-400 font-normal">(Optional)</span></label>
+              <input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                value={addRecruiterForm.firstName} onChange={e => setAddRecruiterForm({...addRecruiterForm, firstName: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">Reviewer Last Name <span className="text-gray-400 font-normal">(Optional)</span></label>
+              <input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                value={addRecruiterForm.lastName} onChange={e => setAddRecruiterForm({...addRecruiterForm, lastName: e.target.value})} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Role Applied For <span className="text-red-500">*</span></label>
+            <input required placeholder="e.g. Software Engineer..." className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              value={addRecruiterForm.roleTitle} onChange={e => setAddRecruiterForm({...addRecruiterForm, roleTitle: e.target.value})} />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Company <span className="text-red-500">*</span></label>
+            <input required placeholder="e.g. Google, Amazon..." className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              value={addRecruiterForm.firm} onChange={e => setAddRecruiterForm({...addRecruiterForm, firm: e.target.value})} />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Location (City, State)</label>
+            <input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              value={addRecruiterForm.location} onChange={e => setAddRecruiterForm({...addRecruiterForm, location: e.target.value})} />
+          </div>
+          <button type="submit" disabled={!addRecruiterForm.firm || !addRecruiterForm.roleTitle}
+            className={`w-full font-bold py-4 rounded-xl transition-colors mt-6 ${addRecruiterForm.firm && addRecruiterForm.roleTitle ? 'bg-black text-white hover:bg-gray-900 shadow-lg' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}>
+            Next: Write Review
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+
+  const renderSuccess = () => {
+    if (!submittedReview) return null;
+    const isPositive = submittedReview.rating >= 4;
+    const isNegative = submittedReview.rating <= 2;
+    let content = {
+      headline: "Intel Received. 📂", emoji: "📂",
+      body: "You're officially an insider. Thanks to you, the hiring market just got a little less opaque.",
+      primaryBtn: "Share Intel", shareText: `Just checked the intel on my recruiter at RecruiterScoop.com. Don't fly blind.`, secondaryLink: "Search for another recruiter"
+    };
+    if (isPositive) {
+      content = {
+        headline: "Review Secured.", emoji: "🚀", body: "Thanks for highlighting the good ones! Your review is now live.",
+        primaryBtn: "Share the Love", shareText: `Just gave my recruiter a glowing review on RecruiterScoop.com.`, secondaryLink: "See who else is hiring"
+      };
+    } else if (isNegative) {
+      content = {
+        headline: "Loud and Clear.", emoji: "🛡️", body: "Thanks for speaking up. Your review has been added to the database.",
+        primaryBtn: "Warn Your Network", shareText: `Hiring is tough enough without bad actors. I just dropped some honest intel.`, secondaryLink: "Read other horror stories"
+      };
+    }
     return (
-      <div 
-        key={recruiter.id}
-        onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }}
-        className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden"
-      >
-        <div className="absolute top-0 right-0 p-4 flex flex-col items-end gap-2">
-          <div className={`font-black text-xl px-3 py-1 rounded-lg border border-gray-100 transition-colors ${
-              (recruiter.rating || 0) >= 4 ? 'bg-green-50 text-green-700' :
-              (recruiter.rating || 0) >= 3 ? 'bg-yellow-50 text-yellow-700' :
-              'bg-gray-50 text-gray-900'
-          }`}>
-            {recruiter.rating ? recruiter.rating.toFixed(1) : '-'}
+      <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-8">
+        <div className="bg-white p-10 rounded-3xl shadow-2xl border border-gray-100 max-w-2xl w-full text-center relative overflow-hidden">
+          <div className={`absolute top-0 left-0 w-full h-3 ${isPositive ? 'bg-green-500' : isNegative ? 'bg-red-500' : 'bg-blue-600'}`}></div>
+          <div className="text-6xl mb-6">{content.emoji}</div>
+          <h2 className="text-4xl font-black text-gray-900 mb-4">{content.headline}</h2>
+          <p className="text-xl text-gray-600 mb-10 leading-relaxed">{content.body}</p>
+          <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-10 text-left shadow-sm">
+            <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Review Confirmed</div>
+            <h3 className="text-2xl font-black text-gray-900 mb-1">"{submittedReview.headline}"</h3>
+            <div className="text-gray-500 font-medium">Re: {submittedReview.recruiterName} <span className="text-gray-300 mx-2">|</span> {submittedReview.firm}</div>
           </div>
-          {isVerified && (
-            <div className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
-              <Award className="w-3 h-3" /> VERIFIED
-            </div>
-          )}
-        </div>
-        <div className="pr-12">
-          <h3 className="font-bold text-lg text-gray-900 mb-1 leading-tight">{recruiter.name || "Hiring Team"}</h3>
-          <div className="text-gray-500 text-sm flex items-center gap-2 mb-4">
-            <Building className="w-3 h-3" /> {recruiter.firm}
+          <div className="flex flex-col gap-4">
+            <button onClick={() => setShareModalOpen(true)} className={`w-full py-4 rounded-xl font-bold text-lg text-white shadow-lg flex items-center justify-center gap-2 transition-transform hover:-translate-y-1 ${isPositive ? 'bg-green-600 hover:bg-green-700' : isNegative ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
+              <Share2 className="w-5 h-5" />{content.primaryBtn}
+            </button>
+            <button onClick={() => { handleSetView('home'); setSearchQuery(''); }} className="text-gray-500 font-bold hover:text-gray-900 py-2">{content.secondaryLink}</button>
           </div>
-          {recruiter.roleTitle && (
-            <div className="flex items-center gap-2 text-xs font-bold text-blue-600 mb-4">
-              <Briefcase className="w-3 h-3" /> {recruiter.roleTitle}
-            </div>
-          )}
-          <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
-            <span>{recruiter.reviewCount || 0} {recruiter.reviewCount === 1 ? 'Review' : 'Reviews'}</span>
-          </div>
+          <ShareModal isOpen={shareModalOpen} onClose={() => setShareModalOpen(false)} shareText={content.shareText} isPositive={isPositive} />
         </div>
       </div>
     );
@@ -729,176 +589,64 @@ export default function App() {
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <div className="text-center max-w-2xl">
         <div className="flex items-center justify-center gap-3 mb-6">
-           <div className="bg-blue-600 text-white p-3 rounded-xl shadow-lg rotate-[-5deg]">
-              <Eye className="w-8 h-8" />
-           </div>
+           <div className="bg-blue-600 text-white p-3 rounded-xl shadow-lg rotate-[-5deg]"><Eye className="w-8 h-8" /></div>
         </div>
-        <h1 className="text-4xl md:text-6xl font-black text-gray-900 mb-6 tracking-tight leading-tight">
-          e<span className="text-blue-600">View</span>
-        </h1>
-        <p className="text-xl md:text-2xl text-gray-600 mb-2 font-bold">
-          The Professional Accountability Utility.
-        </p>
-        <p className="text-sm text-gray-400 mb-10 font-medium tracking-wide uppercase">
-          Gossip is noise. Data is power.
-        </p>
-        
+        <h1 className="text-4xl md:text-6xl font-black text-gray-900 mb-6 tracking-tight leading-tight">e<span className="text-blue-600">View</span></h1>
+        <p className="text-xl md:text-2xl text-gray-600 mb-2 font-bold">The Professional Accountability Utility.</p>
+        <p className="text-sm text-gray-400 mb-10 font-medium tracking-wide uppercase">Gossip is noise. Data is power.</p>
         <div className="relative w-full max-w-xl mx-auto mb-16 shadow-2xl rounded-full bg-white group border border-gray-100">
           <div className="absolute inset-0 w-full h-16 pl-14 pr-6 rounded-full flex items-center pointer-events-none overflow-hidden text-lg">
              <span className="text-transparent whitespace-pre">{searchQuery}</span>
-             {bestMatch && bestMatch.name.toLowerCase() !== searchQuery.toLowerCase() && (
-               <span className="text-gray-300">
-                 {bestMatch.name.slice(searchQuery.length)}
-               </span>
-             )}
+             {bestMatch && bestMatch.name.toLowerCase() !== searchQuery.toLowerCase() && (<span className="text-gray-300">{bestMatch.name.slice(searchQuery.length)}</span>)}
           </div>
-
-          <input 
-            type="text" 
-            placeholder={bestMatch ? "" : "Run a PreView check on a recruiter..."}
-            className="relative w-full h-16 pl-14 pr-6 rounded-full border-0 bg-transparent text-lg focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-900 z-10 placeholder-gray-400"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-            spellCheck="false"
-            autoComplete="off"
-          />
+          <input type="text" placeholder={bestMatch ? "" : "Run a PreView check on a recruiter..."} className="relative w-full h-16 pl-14 pr-6 rounded-full border-0 bg-transparent text-lg focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-900 z-10 placeholder-gray-400"
+            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleSearchKeyDown} spellCheck="false" autoComplete="off" />
           <Search className="absolute left-5 top-5 text-gray-400 w-6 h-6 z-20" />
-          
           {bestMatch && bestMatch.name.toLowerCase() !== searchQuery.toLowerCase() && (
-            <div className="absolute right-6 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium pointer-events-none z-20 hidden md:block">
-               Press <span className="border border-gray-200 bg-gray-50 rounded px-1.5 py-0.5 text-[10px]">TAB</span>
-            </div>
+            <div className="absolute right-6 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium pointer-events-none z-20 hidden md:block">Press <span className="border border-gray-200 bg-gray-50 rounded px-1.5 py-0.5 text-[10px]">TAB</span></div>
           )}
         </div>
       </div>
-
       <div className="w-full max-w-5xl">
         {searchQuery && (
           <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
-            <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2">
-              <FileCheck className="w-5 h-5 text-blue-600" />
-              {showAutoAddProfile 
-                ? 'Creating Profile' 
-                : 'Search Results'
-              }
-            </h2>
+            <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2"><FileCheck className="w-5 h-5 text-blue-600" />{showAutoAddProfile ? 'Creating Profile' : 'Search Results'}</h2>
           </div>
         )}
-
         {showAutoAddProfile ? (
           <div className="bg-white p-8 rounded-2xl shadow-xl border border-blue-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center gap-2 mb-6 text-blue-600">
-              <Info className="w-5 h-5" />
-              <span className="font-bold">No data found. Initialize a new profile.</span>
-            </div>
-            
+            <div className="flex items-center gap-2 mb-6 text-blue-600"><Info className="w-5 h-5" /><span className="font-bold">No data found. Initialize a new profile.</span></div>
             <form onSubmit={handleAddRecruiter} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">First Name <span className="text-gray-400 font-normal">(Optional)</span></label>
-                  <input 
-                    className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    value={addRecruiterForm.firstName}
-                    onChange={e => setAddRecruiterForm({...addRecruiterForm, firstName: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">Last Name <span className="text-gray-400 font-normal">(Optional)</span></label>
-                  <input 
-                    className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    value={addRecruiterForm.lastName}
-                    onChange={e => setAddRecruiterForm({...addRecruiterForm, lastName: e.target.value})}
-                  />
-                </div>
+                <div><label className="block text-sm font-bold text-gray-700 mb-1">Reviewer First Name <span className="text-gray-400 font-normal">(Optional)</span></label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.firstName} onChange={e => setAddRecruiterForm({...addRecruiterForm, firstName: e.target.value})} /></div>
+                <div><label className="block text-sm font-bold text-gray-700 mb-1">Reviewer Last Name <span className="text-gray-400 font-normal">(Optional)</span></label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.lastName} onChange={e => setAddRecruiterForm({...addRecruiterForm, lastName: e.target.value})} /></div>
               </div>
-              
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Role Applied For <span className="text-red-500">*</span></label>
-                <input 
-                  required
-                  placeholder="e.g. Software Engineer..."
-                  className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                  value={addRecruiterForm.roleTitle}
-                  onChange={e => setAddRecruiterForm({...addRecruiterForm, roleTitle: e.target.value})}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Company <span className="text-red-500">*</span></label>
-                <input 
-                  required
-                  placeholder="e.g. Google, Amazon..."
-                  className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                  value={addRecruiterForm.firm}
-                  onChange={e => setAddRecruiterForm({...addRecruiterForm, firm: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Location (City, State)</label>
-                <input 
-                  className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                  value={addRecruiterForm.location}
-                  onChange={e => setAddRecruiterForm({...addRecruiterForm, location: e.target.value})}
-                />
-              </div>
-
-              <button 
-                type="submit"
-                disabled={!addRecruiterForm.firm || !addRecruiterForm.roleTitle}
-                className={`w-full font-bold py-4 rounded-xl transition-colors mt-6 flex items-center justify-center gap-2 ${
-                  addRecruiterForm.firm && addRecruiterForm.roleTitle
-                    ? 'bg-black text-white hover:bg-gray-900 shadow-lg' 
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                Proceed to Verification <ArrowRight className="w-4 h-4" />
-              </button>
+              <div><label className="block text-sm font-bold text-gray-700 mb-1">Role Applied For <span className="text-red-500">*</span></label><input required placeholder="e.g. Software Engineer..." className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.roleTitle} onChange={e => setAddRecruiterForm({...addRecruiterForm, roleTitle: e.target.value})} /></div>
+              <div><label className="block text-sm font-bold text-gray-700 mb-1">Company <span className="text-red-500">*</span></label><input required placeholder="e.g. Google, Amazon..." className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.firm} onChange={e => setAddRecruiterForm({...addRecruiterForm, firm: e.target.value})} /></div>
+              <div><label className="block text-sm font-bold text-gray-700 mb-1">Location (City, State)</label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.location} onChange={e => setAddRecruiterForm({...addRecruiterForm, location: e.target.value})} /></div>
+              <button type="submit" disabled={!addRecruiterForm.firm || !addRecruiterForm.roleTitle} className={`w-full font-bold py-4 rounded-xl transition-colors mt-6 flex items-center justify-center gap-2 ${addRecruiterForm.firm && addRecruiterForm.roleTitle ? 'bg-black text-white hover:bg-gray-900 shadow-lg' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}>Proceed to Verification <ArrowRight className="w-4 h-4" /></button>
             </form>
           </div>
         ) : searchQuery ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredRecruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} />)}
-          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">{filteredRecruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
         ) : (
           <div className="space-y-12">
             {dashboardData.recruiters.length > 0 && (
               <div>
-                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
-                  <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2">
-                    <UserPlus className="w-5 h-5 text-blue-600" />
-                    Verified Partners {userLocation ? `in ${userLocation}` : '(Global)'}
-                  </h2>
-                </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {dashboardData.recruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} />)}
-                </div>
+                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-600" /> TOP REVIEWERS</h2></div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">{dashboardData.recruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
               </div>
             )}
-
             {dashboardData.teams.length > 0 && (
               <div>
-                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
-                  <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2">
-                    <Building className="w-5 h-5 text-blue-600" />
-                    Top Hiring Teams {userLocation ? `in ${userLocation}` : '(Global)'}
-                  </h2>
-                </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {dashboardData.teams.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} />)}
-                </div>
+                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2"><Building className="w-5 h-5 text-blue-600" /> TOP REVIEW TEAMS</h2></div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">{dashboardData.teams.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
               </div>
             )}
-
             {dashboardData.recruiters.length === 0 && dashboardData.teams.length === 0 && (
               <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
                 <p className="text-gray-500 mb-4 text-lg">No data available for this region.</p>
-                <button 
-                  onClick={() => handleSetView('add')}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 shadow-lg"
-                >
-                  Submit the First Review
-                </button>
+                <button onClick={() => handleSetView('add')} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 shadow-lg">Submit the First Review</button>
               </div>
             )}
           </div>
@@ -1247,280 +995,20 @@ export default function App() {
   );
   };
 
-  const renderAddRecruiter = () => (
-    <div className="max-w-xl mx-auto px-4 py-8">
-       <button onClick={() => handleSetView('home')} className="mb-6 text-gray-500 hover:text-gray-900 flex items-center gap-1 text-sm font-medium">
-        <ChevronRight className="w-4 h-4 rotate-180" /> Back
-      </button>
-      
-      <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-        <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
-          <UserPlus className="w-6 h-6 text-blue-600" />
-          Add Profile
-        </h2>
-        <form onSubmit={handleAddRecruiter} className="space-y-4">
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">First Name <span className="text-gray-400 font-normal">(Optional)</span></label>
-              <input 
-                className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                value={addRecruiterForm.firstName}
-                onChange={e => setAddRecruiterForm({...addRecruiterForm, firstName: e.target.value})}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Last Name <span className="text-gray-400 font-normal">(Optional)</span></label>
-              <input 
-                className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                value={addRecruiterForm.lastName}
-                onChange={e => setAddRecruiterForm({...addRecruiterForm, lastName: e.target.value})}
-              />
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Role Applied For <span className="text-red-500">*</span></label>
-            <input 
-              required
-              placeholder="e.g. Software Engineer, Account Executive..."
-              className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-              value={addRecruiterForm.roleTitle}
-              onChange={e => setAddRecruiterForm({...addRecruiterForm, roleTitle: e.target.value})}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Company <span className="text-red-500">*</span></label>
-            <input 
-              required
-              placeholder="e.g. Google, Amazon, TekSystems..."
-              className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-              value={addRecruiterForm.firm}
-              onChange={e => setAddRecruiterForm({...addRecruiterForm, firm: e.target.value})}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Location (City, State)</label>
-            <input 
-              className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-              value={addRecruiterForm.location}
-              onChange={e => setAddRecruiterForm({...addRecruiterForm, location: e.target.value})}
-            />
-          </div>
-
-          <p className="text-xs text-gray-400 mt-2">
-            By adding this profile, you assist others in finding the right intel.
-          </p>
-          <button 
-            type="submit"
-            disabled={!addRecruiterForm.firm || !addRecruiterForm.roleTitle}
-            className={`w-full font-bold py-4 rounded-xl transition-colors mt-6 flex items-center justify-center gap-2 ${
-              addRecruiterForm.firm && addRecruiterForm.roleTitle
-                ? 'bg-black text-white hover:bg-gray-900 shadow-lg' 
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            Next: Write Review <ArrowRight className="w-4 h-4" />
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-
-  const renderSuccess = () => {
-    if (!submittedReview) return null;
-
-    const isPositive = submittedReview.rating >= 4;
-    const isNegative = submittedReview.rating <= 2;
-    // Rating 3 is Universal/Neutral
-
-    let content = {
-      headline: "Intel Received. 📂",
-      emoji: "📂",
-      body: "You're officially an insider. Thanks to you, the hiring market just got a little less opaque. We are processing your review now.",
-      primaryBtn: "Share Intel",
-      shareText: `Just checked the intel on my recruiter at RecruiterScoop.com. Don't fly blind.`,
-      secondaryLink: "Search for another recruiter"
-    };
-
-    if (isPositive) {
-      content = {
-        headline: "Review Secured.",
-        emoji: "🚀",
-        body: "Thanks for highlighting the good ones! The hiring industry needs more recruiters like that, and you just helped them stand out from the noise. Your review is now live.",
-        primaryBtn: "Share the Love",
-        shareText: `Just gave my recruiter a glowing review on RecruiterScoop.com. Good recruiters deserve to be seen. Go check your grade!`,
-        secondaryLink: "See who else is hiring"
-      };
-    } else if (isNegative) {
-      content = {
-        headline: "Loud and Clear.",
-        emoji: "🛡️",
-        body: "Thanks for speaking up. Transparency is the only way to fix broken hiring processes. Your review has been added to the database and will help future candidates dodge a bullet.",
-        primaryBtn: "Warn Your Network",
-        shareText: `Hiring is tough enough without bad actors. I just dropped some honest intel on RecruiterScoop.com. Before you take that call, check the scoop.`,
-        secondaryLink: "Read other horror stories"
-      };
-    }
-
-    return (
-      <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-8">
-        <div className="bg-white p-10 rounded-3xl shadow-2xl border border-gray-100 max-w-2xl w-full text-center relative overflow-hidden">
-          {/* Decorative Background Element */}
-          <div className={`absolute top-0 left-0 w-full h-3 ${isPositive ? 'bg-green-500' : isNegative ? 'bg-red-500' : 'bg-blue-600'}`}></div>
-          
-          <div className="text-6xl mb-6">{content.emoji}</div>
-          <h2 className="text-4xl font-black text-gray-900 mb-4">{content.headline}</h2>
-          <p className="text-xl text-gray-600 mb-10 leading-relaxed">
-            {content.body}
-          </p>
-
-          {/* The Share Card - Visual Rep of the Scoop - Straightened by removing rotate class */}
-          <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-10 text-left shadow-sm">
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Review Confirmed</div>
-            <h3 className="text-2xl font-black text-gray-900 mb-1">"{submittedReview.headline}"</h3>
-            <div className="text-gray-500 font-medium">
-               Re: {submittedReview.recruiterName} <span className="text-gray-300 mx-2">|</span> {submittedReview.firm}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <button 
-              onClick={() => setShareModalOpen(true)}
-              className={`w-full py-4 rounded-xl font-bold text-lg text-white shadow-lg flex items-center justify-center gap-2 transition-transform hover:-translate-y-1 ${
-                isPositive ? 'bg-green-600 hover:bg-green-700' : 
-                isNegative ? 'bg-red-600 hover:bg-red-700' : 
-                'bg-blue-600 hover:bg-blue-700'
-              }`}
-            >
-              <Share2 className="w-5 h-5" />
-              {content.primaryBtn}
-            </button>
-            <button 
-              onClick={() => { handleSetView('home'); setSearchQuery(''); }}
-              className="text-gray-500 font-bold hover:text-gray-900 py-2"
-            >
-              {content.secondaryLink}
-            </button>
-          </div>
-
-          {/* Share Modal */}
-          <ShareModal 
-            isOpen={shareModalOpen} 
-            onClose={() => setShareModalOpen(false)} 
-            shareText={content.shareText}
-            isPositive={isPositive}
-          />
-
-          {/* The Loop Section */}
-          <div className="mt-12 pt-8 border-t border-gray-100">
-             <div className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">While you're here...</div>
-             <div className="grid md:grid-cols-2 gap-4">
-                <button 
-                   onClick={() => { handleSetView('home'); setSearchQuery(''); }}
-                   className="p-4 rounded-xl border border-gray-200 hover:border-black hover:bg-gray-50 transition-all text-left group"
-                >
-                   <div className="font-bold text-gray-900 group-hover:text-blue-600 flex items-center gap-2">
-                     Search Previous Recruiter <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                   </div>
-                   <div className="text-xs text-gray-500 mt-1">Leave another review</div>
-                </button>
-                <button 
-                   onClick={() => { handleSetView('headlines'); }}
-                   className="p-4 rounded-xl border border-gray-200 hover:border-black hover:bg-gray-50 transition-all text-left group"
-                >
-                   <div className="font-bold text-gray-900 group-hover:text-blue-600 flex items-center gap-2">
-                     See Top Rated <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                   </div>
-                   <div className="text-xs text-gray-500 mt-1">In your industry</div>
-                </button>
-             </div>
-          </div>
-
-        </div>
-      </div>
-    );
-  };
-
-  const renderBlog = () => (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-3xl md:text-4xl font-black mb-8">Intel Blog</h1>
-      <div className="grid gap-8">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-sm font-bold text-blue-600 mb-2">CAREER ADVICE</div>
-            <h2 className="text-2xl font-bold mb-3">How to Spot a "Ghoster" Before the First Call</h2>
-            <p className="text-gray-600 mb-4">Red flags are easy to spot if you know where to look. Here is the 5-point checklist...</p>
-            <button className="text-sm font-bold underline">Read Article</button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderLegal = (type) => (
-    <div className="max-w-3xl mx-auto px-4 py-12 prose prose-blue">
-      <h1 className="text-2xl md:text-3xl font-black mb-6">{type === 'privacy' ? 'Privacy Policy' : 'Terms of Use'}</h1>
-      <p className="lead text-lg md:text-xl text-gray-600 mb-8">
-        Last Updated: December 2025. Transparency is our core value, starting with how we handle your data.
-      </p>
-      
-      <h3 className="text-xl font-bold mb-2">1. The Basics</h3>
-      <p className="mb-6 text-gray-700">
-        RecruiterScoop is a public platform. Reviews you post are public. However, we protect your identity. 
-        We do not sell your personal email address to recruiters.
-      </p>
-
-      <h3 className="text-xl font-bold mb-2">2. Content Guidelines</h3>
-      <p className="mb-6 text-gray-700">
-        We reserve the right to remove content that violates our community standards, including hate speech, 
-        doxing, or verifiably false claims.
-      </p>
-      
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-500">
-        This is a placeholder legal document for the prototype. Please consult legal counsel for the production version.
-      </div>
-    </div>
-  );
-
   // --- Main Render ---
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">
       <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 px-6 py-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div 
-            onClick={() => { handleSetView('home'); setSearchQuery(''); setSelectedRecruiter(null); }}
-            className="cursor-pointer hover:opacity-80 transition-opacity"
-          >
-            <Logo />
-          </div>
-          
-          {/* Desktop Nav */}
+          <div onClick={() => { handleSetView('home'); setSearchQuery(''); setSelectedRecruiter(null); }} className="cursor-pointer hover:opacity-80 transition-opacity"><Logo /></div>
           <div className="hidden md:flex items-center gap-6 text-sm font-bold text-gray-600">
             <button onClick={() => { handleSetView('home'); setSearchQuery(''); }} className="hover:text-black">Verified Partners</button>
             <button onClick={() => handleSetView('blog')} className="hover:text-black">Intel Blog</button>
-            <button 
-              onClick={() => handleSetView('add')}
-              className="text-black hover:text-blue-600"
-            >
-              Add Profile
-            </button>
-            <button className="bg-black text-white px-5 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200/50">
-              For Recruiters
-            </button>
+            <button onClick={() => handleSetView('add')} className="text-black hover:text-blue-600">Add Profile</button>
+            <button className="bg-black text-white px-5 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200/50">For Recruiters</button>
           </div>
-          
-          {/* Mobile Nav Toggle */}
-          <button 
-            className="md:hidden text-gray-900"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <button className="md:hidden text-gray-900" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>{mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}</button>
         </div>
-
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 p-4 shadow-xl flex flex-col gap-4 text-center">
             <button onClick={() => handleSetView('home')} className="font-bold text-gray-900 py-2">Partners</button>
@@ -1529,12 +1017,9 @@ export default function App() {
           </div>
         )}
       </nav>
-
       <main className="pb-20">
         {loading ? (
-          <div className="flex items-center justify-center h-[50vh]">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
-          </div>
+          <div className="flex items-center justify-center h-[50vh]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div></div>
         ) : (
           <>
             {(view === 'home' || view === 'headlines') && renderHome()}
@@ -1548,24 +1033,13 @@ export default function App() {
           </>
         )}
       </main>
-
       <footer className="bg-black text-gray-400 py-16 px-6">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12 text-sm">
           <div className="col-span-1 lg:col-span-2 pr-8">
-            <div className="mb-6">
-               <Logo className="w-6 h-6" textClassName="text-white text-2xl" />
-            </div>
-            <p className="leading-relaxed mb-6 text-gray-400">
-              <strong className="text-white block mb-2">The Professional Accountability Utility.</strong>
-              eView is the industry standard for process transparency. We replace gossip with governance, providing objective data to optimize the hiring ecosystem.
-            </p>
-            <div className="flex gap-4">
-               <span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Objective</span>
-               <span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Verified</span>
-               <span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Secure</span>
-            </div>
+            <div className="mb-6"><Logo className="w-6 h-6" textClassName="text-white text-2xl" /></div>
+            <p className="leading-relaxed mb-6 text-gray-400"><strong className="text-white block mb-2">The Professional Accountability Utility.</strong>eView is the industry standard for process transparency. We replace gossip with governance, providing objective data to optimize the hiring ecosystem.</p>
+            <div className="flex gap-4"><span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Objective</span><span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Verified</span><span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Secure</span></div>
           </div>
-          
           <div>
             <h4 className="text-white font-bold mb-6 text-lg">Utility</h4>
             <ul className="space-y-4">
