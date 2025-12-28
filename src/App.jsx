@@ -74,7 +74,7 @@ const getBrowserFingerprint = () => {
   return Math.abs(hash).toString(16);
 };
 
-// --- Components (Defined outside App to avoid recreation on render) ---
+// --- Components ---
 
 const Logo = ({ className = "w-8 h-8", textClassName = "text-xl", showText = true }) => (
   <div className="flex items-center gap-2 select-none">
@@ -185,6 +185,7 @@ const Captcha = ({ onVerify }) => {
   );
 };
 
+// Reusable Card Component
 const RecruiterCard = ({ recruiter, onClick }) => {
   const isVerified = (recruiter.rating >= 4.5) && (recruiter.reviewCount >= 5);
   // Calculate if 10% or more of reviews are critical
@@ -468,6 +469,7 @@ export default function App() {
     });
   }, [recruiters, searchQuery]);
 
+  // Dashboard Logic updated to slice 8 items instead of 6 for 4 columns
   const dashboardData = useMemo(() => {
     if (searchQuery) return { recruiters: [], teams: [] };
     const ranker = (a, b) => {
@@ -486,7 +488,7 @@ export default function App() {
     };
     const namedRecruiters = recruiters.filter(r => r.name && r.name.trim() !== '');
     const hiringTeams = recruiters.filter(r => !r.name || r.name.trim() === '');
-    return { recruiters: namedRecruiters.sort(ranker).slice(0, 6), teams: hiringTeams.sort(ranker).slice(0, 6) };
+    return { recruiters: namedRecruiters.sort(ranker).slice(0, 8), teams: hiringTeams.sort(ranker).slice(0, 8) };
   }, [recruiters, userLocation, searchQuery]);
 
   const showAutoAddProfile = searchQuery.length > 0 && filteredRecruiters.length === 0;
@@ -496,7 +498,8 @@ export default function App() {
     el.select(); document.execCommand('copy'); document.body.removeChild(el); alert("Text copied!");
   };
 
-  // --- Render Functions ---
+  // --- Render Functions (Defined Inside App) ---
+  
   const renderBlog = () => (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <h1 className="text-3xl md:text-4xl font-black mb-8">Intel Blog</h1>
@@ -629,7 +632,7 @@ export default function App() {
           )}
         </div>
       </div>
-      <div className="w-full max-w-5xl">
+      <div className="w-full max-w-7xl">
         {searchQuery && (
           <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
             <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2"><FileCheck className="w-5 h-5 text-blue-600" />{showAutoAddProfile ? 'Creating Profile' : 'Search Results'}</h2>
@@ -650,19 +653,19 @@ export default function App() {
             </form>
           </div>
         ) : searchQuery ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">{filteredRecruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{filteredRecruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
         ) : (
           <div className="space-y-12">
             {dashboardData.recruiters.length > 0 && (
               <div>
                 <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-600" /> TOP REVIEWERS</h2></div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">{dashboardData.recruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{dashboardData.recruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
               </div>
             )}
             {dashboardData.teams.length > 0 && (
               <div>
                 <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2"><Building className="w-5 h-5 text-blue-600" /> TOP REVIEW TEAMS</h2></div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">{dashboardData.teams.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{dashboardData.teams.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
               </div>
             )}
             {dashboardData.recruiters.length === 0 && dashboardData.teams.length === 0 && (
@@ -1021,7 +1024,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">
       <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div onClick={() => { handleSetView('home'); setSearchQuery(''); setSelectedRecruiter(null); }} className="cursor-pointer hover:opacity-80 transition-opacity"><Logo /></div>
           <div className="hidden md:flex items-center gap-6 text-sm font-bold text-gray-600">
             <button onClick={() => { handleSetView('home'); setSearchQuery(''); }} className="hover:text-black">Verified Partners</button>
@@ -1056,7 +1059,7 @@ export default function App() {
         )}
       </main>
       <footer className="bg-black text-gray-400 py-16 px-6">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12 text-sm">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12 text-sm">
           <div className="col-span-1 lg:col-span-2 pr-8">
             <div className="mb-6"><Logo className="w-6 h-6" textClassName="text-white text-2xl" /></div>
             <p className="leading-relaxed mb-6 text-gray-400"><strong className="text-white block mb-2">The Professional Accountability Utility.</strong>eView is the industry standard for process transparency. We replace gossip with governance, providing objective data to optimize the hiring ecosystem.</p>
@@ -1080,7 +1083,7 @@ export default function App() {
             </ul>
           </div>
         </div>
-        <div className="max-w-6xl mx-auto border-t border-gray-900 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600">
+        <div className="max-w-7xl mx-auto border-t border-gray-900 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600">
           <p>© 2025 eView. All Rights Reserved.</p>
           <p className="mt-2 md:mt-0">We aren't here to burn bridges; we're here to light the way.</p>
         </div>
