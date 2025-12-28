@@ -74,7 +74,7 @@ const getBrowserFingerprint = () => {
   return Math.abs(hash).toString(16);
 };
 
-// --- Components ---
+// --- Components (Defined outside App to avoid recreation on render) ---
 
 const Logo = ({ className = "w-8 h-8", textClassName = "text-xl", showText = true }) => (
   <div className="flex items-center gap-2 select-none">
@@ -185,20 +185,31 @@ const Captcha = ({ onVerify }) => {
   );
 };
 
-// Reusable Card Component (Moved outside to prevent scoping errors)
 const RecruiterCard = ({ recruiter, onClick }) => {
   const isVerified = (recruiter.rating >= 4.5) && (recruiter.reviewCount >= 5);
+  // Calculate if 10% or more of reviews are critical
+  const criticalCount = recruiter.criticalFlagCount || 0;
+  const totalReviews = recruiter.reviewCount || 0;
+  const isFlagged = totalReviews > 0 && (criticalCount / totalReviews) >= 0.10;
+
   const getDateString = () => {
     if (!recruiter.lastReviewed) return '';
     return new Date(recruiter.lastReviewed.seconds * 1000).toLocaleDateString();
   };
+  
   return (
     <div onClick={onClick} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 flex flex-col items-end gap-2">
-        <div className={`font-black text-xl px-3 py-1 rounded-lg border border-gray-100 transition-colors ${ (recruiter.rating || 0) >= 4 ? 'bg-green-50 text-green-700' : (recruiter.rating || 0) >= 3 ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-50 text-gray-900' }`}>
-          {recruiter.rating ? recruiter.rating.toFixed(1) : '-'}
-        </div>
-        {isVerified && <div className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1"><Award className="w-3 h-3" /> VERIFIED</div>}
+        {isFlagged ? (
+          <div className="bg-red-100 text-red-600 p-2 rounded-lg border border-red-200 shadow-sm flex items-center justify-center" title="High volume of safety flags reported">
+            <AlertTriangle className="w-6 h-6" />
+          </div>
+        ) : (
+          <div className={`font-black text-xl px-3 py-1 rounded-lg border border-gray-100 transition-colors ${ (recruiter.rating || 0) >= 4 ? 'bg-green-50 text-green-700' : (recruiter.rating || 0) >= 3 ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-50 text-gray-900' }`}>
+            {typeof recruiter.rating === 'number' ? recruiter.rating.toFixed(1) : '-'}
+          </div>
+        )}
+        {isVerified && !isFlagged && <div className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1"><Award className="w-3 h-3" /> VERIFIED</div>}
       </div>
       <div className="pr-12">
         <h3 className="font-bold text-lg text-gray-900 mb-1 leading-tight">{recruiter.name || "Hiring Team"}</h3>
@@ -357,7 +368,8 @@ export default function App() {
       location: addRecruiterForm.location,
       roleTitle: addRecruiterForm.roleTitle,
       rating: 0,
-      reviewCount: 0
+      reviewCount: 0,
+      criticalFlagCount: 0
     });
     handleSetView('rate');
   };
@@ -368,11 +380,17 @@ export default function App() {
       let finalRecruiterId = selectedRecruiter.id;
       let finalRecruiterName = selectedRecruiter.name;
       let finalRecruiterFirm = selectedRecruiter.firm;
+      
+      const hasCriticalTags = rateForm.tags.some(tagId => {
+        const tag = SCOOP_TAGS.find(t => t.id === tagId);
+        return tag && tag.type === 'critical';
+      });
 
       if (selectedRecruiter.id === 'temp_new_recruiter') {
          const newRecruiterData = {
             name: selectedRecruiter.name, firm: selectedRecruiter.firm, location: selectedRecruiter.location,
-            roleTitle: selectedRecruiter.roleTitle || '', rating: 0, reviewCount: 0, createdAt: serverTimestamp(), tags: {}
+            roleTitle: selectedRecruiter.roleTitle || '', rating: 0, reviewCount: 0, createdAt: serverTimestamp(), tags: {},
+            criticalFlagCount: hasCriticalTags ? 1 : 0
          };
          const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'recruiters'), newRecruiterData);
          finalRecruiterId = docRef.id;
@@ -386,9 +404,13 @@ export default function App() {
       const currentRating = selectedRecruiter.id === 'temp_new_recruiter' ? 0 : (selectedRecruiter.rating || 0);
       const newCount = currentCount + 1;
       const newAverage = (currentRating * currentCount + rateForm.rating) / newCount;
-      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'recruiters', finalRecruiterId), {
+      
+      const updateData = {
         rating: newAverage, reviewCount: increment(1), lastReviewed: serverTimestamp()
-      });
+      };
+      if (hasCriticalTags) { updateData.criticalFlagCount = increment(1); }
+
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'recruiters', finalRecruiterId), updateData);
       setSubmittedReview({ rating: rateForm.rating, headline: rateForm.headline, recruiterName: finalRecruiterName || 'Hiring Team', firm: finalRecruiterFirm });
       setRateForm({ stage: '', tags: [], headline: '', comment: '', rating: 0, agreed: false, verified: false });
       handleSetView('success');
