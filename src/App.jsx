@@ -85,12 +85,12 @@ const HeaderLogo = ({ className = "h-20 w-auto" }) => (
   />
 );
 
-const LandingLogo = ({ className = "h-32 w-auto" }) => (
+const LandingLogo = ({ className = "h-40 w-auto" }) => (
   <img 
     src="/eView_Silhoutte_Captioned_Unbolded.svg" 
     alt="eView Logo" 
-    // Added 'mx-auto' here 👇
-    className={`${className} select-none mb-4 mx-auto`}
+    // CHANGE 'mb-4' to 'mb-0' or remove it entirely 👇
+    className={`${className} select-none mb-0 mx-auto`}
   />
 );
 
@@ -109,7 +109,7 @@ const ComingSoonButton = ({ label, popupText, icon }) => {
   const [timer, setTimer] = useState(null);
 
   const handleMouseEnter = () => {
-    const t = setTimeout(() => setShowPopup(true), 2000); 
+    const t = setTimeout(() => setShowPopup(true), 50); 
     setTimer(t);
   };
 
@@ -123,7 +123,7 @@ const ComingSoonButton = ({ label, popupText, icon }) => {
       <button 
         onMouseEnter={handleMouseEnter} 
         onMouseLeave={handleMouseLeave}
-        className="bg-gray-100 text-gray-400 px-5 py-2 rounded-full cursor-not-allowed font-bold"
+        className="bg-black text-white px-5 py-2 rounded-full cursor-not-allowed font-bold"
       >
         {label}
       </button>
@@ -688,7 +688,7 @@ export default function App() {
              <span className="text-transparent whitespace-pre">{searchQuery}</span>
              {bestMatch && bestMatch.name.toLowerCase() !== searchQuery.toLowerCase() && (<span className="text-gray-300">{bestMatch.name.slice(searchQuery.length)}</span>)}
           </div>
-          <input type="text" placeholder={bestMatch ? "" : "PreView or ReView an eView..."} className="relative w-full h-16 pl-14 pr-6 rounded-full border-0 bg-transparent text-lg focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-900 z-10 placeholder-gray-400"
+          <input type="text" placeholder={bestMatch ? "" : "PreView, ReView, or leave an eView..."} className="relative w-full h-16 pl-14 pr-6 rounded-full border-0 bg-transparent text-lg focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-900 z-10 placeholder-gray-400"
             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleSearchKeyDown} spellCheck="false" autoComplete="off" />
           <Search className="absolute left-5 top-5 text-gray-400 w-6 h-6 z-20" />
           {bestMatch && bestMatch.name.toLowerCase() !== searchQuery.toLowerCase() && (
@@ -1096,9 +1096,8 @@ export default function App() {
             <button onClick={() => handleSetView('add')} className="text-black hover:text-blue-600">Add Profile</button>
             <div className="flex gap-2">
                <ComingSoonButton label="eViewer" popupText="eViewer coming soon" icon="🤫" />
-               <ComingSoonButton label="eView Teams" popupText="eViewer Teams coming soon" icon="🙄" />
+               <ComingSoonButton label="eViewer Teams" popupText="eViewer Teams coming soon" icon="🙄" />
             </div>
-            <button onClick={() => handleSetView('blog')} className="hover:text-black">Intel Blog</button>
           </div>
           <button className="md:hidden text-gray-900" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>{mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}</button>
         </div>
@@ -1129,8 +1128,8 @@ export default function App() {
       </main>
       <footer className="bg-black text-gray-400 py-16 px-6">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12 text-sm">
-          <div className="col-span-1 lg:col-span-2 pr-8">
-            <div className="mb-6"><FooterLogo /></div>
+          <div className="col-span-1 bm-6 lg:col-span-2 pr-8">
+            <div className="mb-2"><FooterLogo /></div>
             <p className="leading-relaxed mb-6 text-gray-400"><strong className="text-white block mb-2">The Professional Accountability Utility.</strong>eView is the industry standard for process transparency. We replace gossip with governance, providing objective data to optimize the hiring ecosystem.</p>
             <div className="flex gap-4"><span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Objective</span><span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Verified</span><span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Secure</span></div>
           </div>
@@ -1140,6 +1139,7 @@ export default function App() {
               <li><button onClick={() => { handleSetView('home'); setSearchQuery(''); }} className="hover:text-white transition-colors text-left">PreView Check</button></li>
               <li><button onClick={() => handleSetView('home')} className="hover:text-white transition-colors text-left">Verified Partners</button></li>
               <li><button onClick={() => handleSetView('blog')} className="hover:text-white transition-colors text-left">Process Blog</button></li>
+              <li><button onClick={() => handleSetView('blog')} className="hover:text-black">Intel Blog</button></li>
             </ul>
           </div>
           <div>
