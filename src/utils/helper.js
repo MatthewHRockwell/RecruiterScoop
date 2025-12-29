@@ -11,3 +11,9 @@ export const getBrowserFingerprint = () => {
   }
   return Math.abs(hash).toString(16);
 };
+
+// I extracted this from your RecruiterCard component so it can be reused
+export const formatDate = (seconds) => {
+  if (!seconds) return 'Recently';
+  return new Date(seconds * 1000).toLocaleDateString();
+};

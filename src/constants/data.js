@@ -1,4 +1,4 @@
-// src/constants/data.js
+export const APP_ID = 'recruiter-scoop';
 
 export const STAGES = [
   { id: 'initial', label: 'Initial Chat', desc: 'Screening call.' },
