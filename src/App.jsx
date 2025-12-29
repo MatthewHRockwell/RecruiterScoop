@@ -59,7 +59,14 @@ import {
   Phone
 } from 'lucide-react';
 
-// --- Utilities ---
+
+
+
+
+// ---------------------------------------------------------------- Utilities --------------------------------------------------------------
+
+
+
 
 const getBrowserFingerprint = () => {
   const { userAgent, language, pixelDepth, colorDepth } = navigator;
@@ -75,7 +82,13 @@ const getBrowserFingerprint = () => {
   return Math.abs(hash).toString(16);
 };
 
-// --- Branding Components ---
+
+
+
+// ---------------------------------------------------------- Branding Components -----------------------------------------------------------
+
+
+
 
 const HeaderLogo = ({ className = "h-20 w-auto" }) => (
   <img 
@@ -102,7 +115,15 @@ const FooterLogo = ({ className = "h-20 w-auto" }) => (
   />
 );
 
-// --- Helper Components ---
+
+
+
+
+// ----------------------------------------------------------- Helper Components ------------------------------------------------------------
+
+
+
+
 
 const ComingSoonButton = ({ label, popupText, icon }) => {
   const [showPopup, setShowPopup] = useState(false);
@@ -230,7 +251,14 @@ const Captcha = ({ onVerify }) => {
   );
 };
 
-// Reusable Card Component
+
+
+
+// ---------------------------------------------------------- Reusable Card Component --------------------------------------------------------
+
+
+
+
 const RecruiterCard = ({ recruiter, onClick }) => {
   const isVerified = (recruiter.rating >= 4.5) && (recruiter.reviewCount >= 5);
   // Flag Logic: >10% Critical Reviews
@@ -279,7 +307,13 @@ const RecruiterCard = ({ recruiter, onClick }) => {
   );
 };
 
-// --- Configuration ---
+
+
+
+// --------------------------------------------------------------- Configuration ------------------------------------------------------------
+
+
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyDCmNjPM2avnmrw9qOGB_7S7zG4l0AuHqc",
@@ -317,7 +351,14 @@ const SCOOP_TAGS = [
   { id: 'data_mining', label: 'Data Mining', type: 'critical', desc: 'Excessive PII requested early.' }
 ];
 
-// --- MAIN APP ---
+
+
+
+// ----------------------------------------------------------------- MAIN APP ------------------------------------------------------------
+
+
+
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [view, setView] = useState('home'); 
@@ -551,7 +592,14 @@ export default function App() {
     el.select(); document.execCommand('copy'); document.body.removeChild(el); alert("Text copied!");
   };
 
-  // --- Render Functions (Internal) ---
+
+
+
+
+  // -------------------------------------------------- Render Functions (Internal) ---------------------------------------------------------
+
+
+  
 
   const renderContact = () => (
     <div className="max-w-2xl mx-auto px-4 py-12">
@@ -1084,7 +1132,16 @@ export default function App() {
   );
   };
 
-  // --- Main Render ---
+
+
+
+
+  // ---------------------------------------------------------- Main Render -----------------------------------------------------------------
+
+
+
+
+
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">
       <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 px-6 py-4">
