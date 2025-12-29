@@ -55,7 +55,8 @@ import {
   FileCheck,
   Scale,
   Award,
-  Clock
+  Clock,
+  Phone
 } from 'lucide-react';
 
 // --- Utilities ---
@@ -74,43 +75,100 @@ const getBrowserFingerprint = () => {
   return Math.abs(hash).toString(16);
 };
 
-// --- Components ---
+// --- Components (Defined OUTSIDE App to prevent ReferenceErrors and Re-renders) ---
 
-const Logo = ({ className = "w-8 h-8", textClassName = "text-xl", showText = true }) => (
+const HeaderLogo = ({ className = "w-8 h-8" }) => (
   <div className="flex items-center gap-2 select-none">
-    <div className="relative">
-      <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M50 15C30 15 12 30 5 50C12 70 30 85 50 85C70 85 88 70 95 50C88 30 70 15 50 15ZM50 75C36.19 75 25 63.81 25 50C25 36.19 36.19 25 50 25C63.81 25 75 36.19 75 50C75 63.81 63.81 75 50 75Z" className="fill-black" />
-        <path d="M45 60L35 50L40 45L45 50L60 35L65 40L45 60Z" fill="#2563EB" />
-      </svg>
-    </div>
-    {showText && <span className={`font-black tracking-tight text-gray-900 ${textClassName}`}>e<span className="text-blue-600">View</span></span>}
+     <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 10C27.9 10 10 27.9 10 50C10 72.1 27.9 90 50 90C72.1 90 90 72.1 90 50C90 27.9 72.1 10 50 10ZM50 70C38.9 70 30 61.1 30 50C30 38.9 38.9 30 50 30C61.1 30 70 38.9 70 50C70 61.1 61.1 70 50 70Z" className="fill-black" />
+        <path d="M45 55L35 45L40 40L45 45L60 30L65 35L45 55Z" fill="#2563EB" />
+     </svg>
+     <span className="font-black text-xl tracking-tight text-gray-900">e<span className="text-blue-600">View</span></span>
   </div>
 );
 
+const LandingLogo = ({ className = "w-16 h-16" }) => (
+  <div className="flex flex-col items-center select-none">
+     <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 5C25.1 5 5 25.1 5 50C5 74.9 25.1 95 50 95C74.9 95 95 74.9 95 50C95 25.1 74.9 5 50 5ZM50 75C36.2 75 25 63.8 25 50C25 36.2 36.2 25 50 25C63.8 25 75 36.2 75 50C75 63.8 63.8 75 50 75Z" className="fill-black" />
+        <path d="M45 60L35 50L40 45L45 50L60 35L65 40L45 60Z" fill="#2563EB" />
+     </svg>
+     <div className="text-5xl font-light text-gray-900 mt-4 tracking-tighter">e<span className="text-blue-600">View</span></div>
+  </div>
+);
+
+const FooterLogo = ({ className = "w-10 h-10" }) => (
+  <div className="flex items-center gap-2 select-none">
+     <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 10C27.9 10 10 27.9 10 50C10 72.1 27.9 90 50 90C72.1 90 90 72.1 90 50C90 27.9 72.1 10 50 10ZM50 70C38.9 70 30 61.1 30 50C30 38.9 38.9 30 50 30C61.1 30 70 38.9 70 50C70 61.1 61.1 70 50 70Z" className="fill-white" />
+        <path d="M45 55L35 45L40 40L45 45L60 30L65 35L45 55Z" fill="#2563EB" />
+     </svg>
+     <span className="font-black text-2xl tracking-tight text-white">e<span className="text-blue-500">View</span></span>
+  </div>
+);
+
+const ComingSoonButton = ({ label, popupText, icon }) => {
+  const [showPopup, setShowPopup] = useState(false);
+  const [timer, setTimer] = useState(null);
+
+  const handleMouseEnter = () => {
+    const t = setTimeout(() => setShowPopup(true), 2000); 
+    setTimer(t);
+  };
+
+  const handleMouseLeave = () => {
+    clearTimeout(timer);
+    setShowPopup(false);
+  };
+
+  return (
+    <div className="relative">
+      <button 
+        onMouseEnter={handleMouseEnter} 
+        onMouseLeave={handleMouseLeave}
+        className="bg-gray-100 text-gray-400 px-5 py-2 rounded-full cursor-not-allowed font-bold"
+      >
+        {label}
+      </button>
+      {showPopup && (
+        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-black text-white text-xs p-2 rounded shadow-lg z-50 text-center animate-in fade-in zoom-in duration-200">
+          {popupText} <span className="text-lg">{icon}</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ShareModal = ({ isOpen, onClose, shareText, isPositive }) => {
   if (!isOpen) return null;
+
   const url = "https://reviewereview.com"; 
   const encodedText = encodeURIComponent(shareText);
   const encodedUrl = encodeURIComponent(url);
+
   const copyToClipboard = () => {
-    const el = document.createElement('textarea'); el.value = shareText; document.body.appendChild(el);
-    el.select(); document.execCommand('copy'); document.body.removeChild(el); alert("Text copied to clipboard!");
+    const el = document.createElement('textarea');
+    el.value = shareText;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    alert("Text copied to clipboard!");
   };
+
   const shareLinks = [
     { name: "LinkedIn", icon: <Linkedin className="w-6 h-6 text-white" />, bg: "bg-[#0077b5]", href: `https://www.linkedin.com/feed/?shareActive=true&text=${encodedText}` },
     { name: "X (Twitter)", icon: <Twitter className="w-6 h-6 text-white" />, bg: "bg-black", href: `https://twitter.com/intent/tweet?text=${encodedText}` },
     { name: "Facebook", icon: <Facebook className="w-6 h-6 text-white" />, bg: "bg-[#1877f2]", href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}` },
     { name: "Email", icon: <Mail className="w-6 h-6 text-white" />, bg: "bg-gray-600", href: `mailto:?subject=Review on eView&body=${encodedText}` }
   ];
+
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-6 h-6" /></button>
         <div className="text-center mb-8">
-          <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${isPositive ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}><Share2 className="w-8 h-8" /></div>
-          <h2 className="text-2xl font-black text-gray-900">Share the eView</h2>
-          <p className="text-gray-500 mt-2 text-sm">Help others optimize their hiring process.</p>
+           <h2 className="text-2xl font-black text-gray-900">Share the eView</h2>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-6">
           {shareLinks.map((link) => (
@@ -119,7 +177,6 @@ const ShareModal = ({ isOpen, onClose, shareText, isPositive }) => {
             </a>
           ))}
         </div>
-        <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div><div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-500">or copy link manually</span></div></div>
         <div className="mt-6 flex gap-2">
           <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-600 truncate">{url}</div>
           <button onClick={copyToClipboard} className="bg-gray-900 text-white px-4 rounded-lg font-bold text-sm hover:bg-gray-800 transition-colors flex items-center gap-2"><LinkIcon className="w-4 h-4" /> Copy</button>
@@ -188,31 +245,37 @@ const Captcha = ({ onVerify }) => {
 // Reusable Card Component
 const RecruiterCard = ({ recruiter, onClick }) => {
   const isVerified = (recruiter.rating >= 4.5) && (recruiter.reviewCount >= 5);
-  // Calculate if 10% or more of reviews are critical
+  // Flag Logic: >10% Critical Reviews
   const criticalCount = recruiter.criticalFlagCount || 0;
   const totalReviews = recruiter.reviewCount || 0;
   const isFlagged = totalReviews > 0 && (criticalCount / totalReviews) >= 0.10;
 
   const getDateString = () => {
-    if (!recruiter.lastReviewed) return '';
+    if (!recruiter.lastReviewed) return 'Recently';
     return new Date(recruiter.lastReviewed.seconds * 1000).toLocaleDateString();
+  };
+
+  const getRatingStyle = (r) => {
+     if (r >= 4.0) return "bg-gradient-to-br from-green-300 to-green-500";
+     if (r >= 3.0) return "bg-gradient-to-br from-yellow-300 to-yellow-500";
+     return "bg-gradient-to-br from-red-300 to-red-500";
   };
   
   return (
     <div onClick={onClick} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 flex flex-col items-end gap-2">
         {isFlagged ? (
-          <div className="bg-red-100 text-red-600 p-2 rounded-lg border border-red-200 shadow-sm flex items-center justify-center" title="High volume of safety flags reported">
+          <div className="bg-red-100 text-red-600 w-12 h-12 rounded-lg border border-red-200 shadow-sm flex items-center justify-center" title="High volume of safety flags reported">
             <AlertTriangle className="w-6 h-6" />
           </div>
         ) : (
-          <div className={`font-black text-xl px-3 py-1 rounded-lg border border-gray-100 transition-colors ${ (recruiter.rating || 0) >= 4 ? 'bg-green-50 text-green-700' : (recruiter.rating || 0) >= 3 ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-50 text-gray-900' }`}>
+          <div className={`text-black font-black text-xl w-12 h-12 flex items-center justify-center rounded-lg shadow-sm ${getRatingStyle(recruiter.rating || 0)}`}>
             {typeof recruiter.rating === 'number' ? recruiter.rating.toFixed(1) : '-'}
           </div>
         )}
         {isVerified && !isFlagged && <div className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1"><Award className="w-3 h-3" /> VERIFIED</div>}
       </div>
-      <div className="pr-12">
+      <div className="pr-16">
         <h3 className="font-bold text-lg text-gray-900 mb-1 leading-tight">{recruiter.name || "Hiring Team"}</h3>
         <div className="text-gray-500 text-sm flex items-center gap-2 mb-2"><Building className="w-3 h-3" /> {recruiter.firm}</div>
         <div className="flex flex-col gap-1">
@@ -469,18 +532,20 @@ export default function App() {
     });
   }, [recruiters, searchQuery]);
 
-  // Dashboard Logic updated to slice 8 items instead of 6 for 4 columns
   const dashboardData = useMemo(() => {
     if (searchQuery) return { recruiters: [], teams: [] };
+    const isCriticalProfile = (r) => {
+      const total = r.reviewCount || 0;
+      if (total === 0) return false;
+      return (r.criticalFlagCount || 0) / total >= 0.10;
+    };
     const ranker = (a, b) => {
+       const aBad = isCriticalProfile(a); const bBad = isCriticalProfile(b);
+       if (aBad && !bBad) return 1; if (!aBad && bBad) return -1;
        if (userLocation) {
-         const aLoc = (a.location || '').toLowerCase();
-         const bLoc = (b.location || '').toLowerCase();
-         const loc = userLocation.toLowerCase();
-         const aIsLocal = aLoc.includes(loc);
-         const bIsLocal = bLoc.includes(loc);
-         if (aIsLocal && !bIsLocal) return -1;
-         if (!aIsLocal && bIsLocal) return 1;
+         const aLoc = (a.location || '').toLowerCase(); const bLoc = (b.location || '').toLowerCase(); const loc = userLocation.toLowerCase();
+         const aIsLocal = aLoc.includes(loc); const bIsLocal = bLoc.includes(loc);
+         if (aIsLocal && !bIsLocal) return -1; if (!aIsLocal && bIsLocal) return 1;
        }
        const scoreA = (a.rating || 0) * Math.log((a.reviewCount || 0) + 1);
        const scoreB = (b.rating || 0) * Math.log((b.reviewCount || 0) + 1);
@@ -498,8 +563,22 @@ export default function App() {
     el.select(); document.execCommand('copy'); document.body.removeChild(el); alert("Text copied!");
   };
 
-  // --- Render Functions (Defined Inside App) ---
-  
+  // --- Render Functions (Internal) ---
+
+  const renderContact = () => (
+    <div className="max-w-2xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-black mb-6">Contact Us</h1>
+      <p className="text-gray-600 mb-8">We are here to help. Reach out with questions or feedback.</p>
+      <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 space-y-4">
+         <div><label className="block text-sm font-bold text-gray-700 mb-1">Name</label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200" placeholder="Your Name" /></div>
+         <div><label className="block text-sm font-bold text-gray-700 mb-1">Email</label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200" placeholder="you@example.com" /></div>
+         <div><label className="block text-sm font-bold text-gray-700 mb-1">Phone</label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200" placeholder="(555) 555-5555" /></div>
+         <div><label className="block text-sm font-bold text-gray-700 mb-1">Message</label><textarea className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 h-32" placeholder="How can we help?" /></div>
+         <a href="mailto:contact@RevieweReView.com" className="block text-center w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors">Send Message via Email</a>
+      </div>
+    </div>
+  );
+
   const renderBlog = () => (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <h1 className="text-3xl md:text-4xl font-black mb-8">Intel Blog</h1>
@@ -656,13 +735,13 @@ export default function App() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{filteredRecruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
         ) : (
           <div className="space-y-12">
-            {dashboardData.recruiters.length > 0 && (
+            {(view === 'home' || view === 'eviews') && dashboardData.recruiters.length > 0 && (
               <div>
                 <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-600" /> TOP REVIEWERS</h2></div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{dashboardData.recruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
               </div>
             )}
-            {dashboardData.teams.length > 0 && (
+            {(view === 'home' || view === 'teams') && dashboardData.teams.length > 0 && (
               <div>
                 <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2"><Building className="w-5 h-5 text-blue-600" /> TOP REVIEW TEAMS</h2></div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{dashboardData.teams.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
@@ -1025,12 +1104,16 @@ export default function App() {
     <div className="min-h-screen bg-white font-sans text-gray-900">
       <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 px-6 py-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div onClick={() => { handleSetView('home'); setSearchQuery(''); setSelectedRecruiter(null); }} className="cursor-pointer hover:opacity-80 transition-opacity"><Logo /></div>
+          <div onClick={() => { handleSetView('home'); setSearchQuery(''); setSelectedRecruiter(null); }} className="cursor-pointer hover:opacity-80 transition-opacity"><HeaderLogo /></div>
           <div className="hidden md:flex items-center gap-6 text-sm font-bold text-gray-600">
-            <button onClick={() => { handleSetView('home'); setSearchQuery(''); }} className="hover:text-black">Verified Partners</button>
-            <button onClick={() => handleSetView('blog')} className="hover:text-black">Intel Blog</button>
+            <button onClick={() => { handleSetView('eviews'); }} className="hover:text-black">eViews</button>
+            <button onClick={() => { handleSetView('teams'); }} className="hover:text-black">eView Teams</button>
             <button onClick={() => handleSetView('add')} className="text-black hover:text-blue-600">Add Profile</button>
-            <button className="bg-black text-white px-5 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200/50">For Recruiters</button>
+            <div className="flex gap-2">
+               <ComingSoonButton label="eViewer" popupText="eViewer coming soon" icon="🤫" />
+               <ComingSoonButton label="eView Teams" popupText="eViewer Teams coming soon" icon="🙄" />
+            </div>
+            <button onClick={() => handleSetView('blog')} className="hover:text-black">Intel Blog</button>
           </div>
           <button className="md:hidden text-gray-900" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>{mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}</button>
         </div>
@@ -1047,12 +1130,13 @@ export default function App() {
           <div className="flex items-center justify-center h-[50vh]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div></div>
         ) : (
           <>
-            {(view === 'home' || view === 'headlines') && renderHome()}
+            {(view === 'home' || view === 'eviews' || view === 'teams') && renderHome()}
             {view === 'recruiter' && selectedRecruiter && renderRecruiterProfile()}
             {view === 'rate' && selectedRecruiter && renderRateForm()}
             {view === 'add' && renderAddRecruiter()}
             {view === 'success' && renderSuccess()}
             {view === 'blog' && renderBlog()}
+            {view === 'contact' && renderContact()}
             {view === 'privacy' && renderLegal('privacy')}
             {view === 'terms' && renderLegal('terms')}
           </>
@@ -1061,7 +1145,7 @@ export default function App() {
       <footer className="bg-black text-gray-400 py-16 px-6">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12 text-sm">
           <div className="col-span-1 lg:col-span-2 pr-8">
-            <div className="mb-6"><Logo className="w-6 h-6" textClassName="text-white text-2xl" /></div>
+            <div className="mb-6"><FooterLogo /></div>
             <p className="leading-relaxed mb-6 text-gray-400"><strong className="text-white block mb-2">The Professional Accountability Utility.</strong>eView is the industry standard for process transparency. We replace gossip with governance, providing objective data to optimize the hiring ecosystem.</p>
             <div className="flex gap-4"><span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Objective</span><span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Verified</span><span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Secure</span></div>
           </div>
@@ -1069,7 +1153,6 @@ export default function App() {
             <h4 className="text-white font-bold mb-6 text-lg">Utility</h4>
             <ul className="space-y-4">
               <li><button onClick={() => { handleSetView('home'); setSearchQuery(''); }} className="hover:text-white transition-colors text-left">PreView Check</button></li>
-              <li><button onClick={() => handleSetView('add')} className="hover:text-white transition-colors text-left">Submit Review</button></li>
               <li><button onClick={() => handleSetView('home')} className="hover:text-white transition-colors text-left">Verified Partners</button></li>
               <li><button onClick={() => handleSetView('blog')} className="hover:text-white transition-colors text-left">Process Blog</button></li>
             </ul>
@@ -1080,6 +1163,7 @@ export default function App() {
               <li><button onClick={() => handleSetView('privacy')} className="hover:text-white transition-colors text-left">Privacy Policy</button></li>
               <li><button onClick={() => handleSetView('terms')} className="hover:text-white transition-colors text-left">Terms of Use</button></li>
               <li><button onClick={() => handleSetView('terms')} className="hover:text-white transition-colors text-left">Standards</button></li>
+              <li><button onClick={() => handleSetView('contact')} className="hover:text-white transition-colors text-left">Contact Us</button></li>
             </ul>
           </div>
         </div>
