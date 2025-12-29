@@ -1,24 +1,28 @@
-# Logs
+# Dependencies - NEVER commit this
+node_modules
+
+# Build Outputs - These are auto-generated
+dist
+dist-ssr
+
+# Logs - Noisy files you don't need
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Environment & Local Config - Security risk if committed
 *.local
+.env
+.env.local
 
-# Editor directories and files
+# Operating System Trash - Mac/Windows system files
+.DS_Store
+Thumbs.db
+
+# Editor Config - Keep your personal settings out of the shared code
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
 *.sw?

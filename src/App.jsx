@@ -58,7 +58,10 @@ import {
   Clock,
   Phone
 } from 'lucide-react';
+import { auth, db, analytics } from './config/firebase';
 
+// You can keep appId here or move it to constants/data.js
+const appId = 'recruiter-scoop';
 
 
 
@@ -315,21 +318,7 @@ const RecruiterCard = ({ recruiter, onClick }) => {
 
 
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDCmNjPM2avnmrw9qOGB_7S7zG4l0AuHqc",
-  authDomain: "recruiterscoop.firebaseapp.com",
-  projectId: "recruiterscoop",
-  storageBucket: "recruiterscoop.firebasestorage.app",
-  messagingSenderId: "850975692966",
-  appId: "1:850975692966:web:3f5ca72035f508a8adbc67",
-  measurementId: "G-8PD21B2XYQ"
-};
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const analytics = getAnalytics(app);
-const appId = 'recruiter-scoop';
 
 const STAGES = [
   { id: 'initial', label: 'Initial Chat', desc: 'Screening call.' },

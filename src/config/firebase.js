@@ -1,8 +1,7 @@
-// src/config/firebase.js
 import { initializeApp } from 'firebase/app';
-import { getAnalytics } from "firebase/analytics";
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDCmNjPM2avnmrw9qOGB_7S7zG4l0AuHqc",
@@ -15,7 +14,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// Export the specific instances we need
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
-export const appId = 'recruiter-scoop';
+export default app;
