@@ -75,37 +75,34 @@ const getBrowserFingerprint = () => {
   return Math.abs(hash).toString(16);
 };
 
-// --- Components (Defined OUTSIDE App to prevent ReferenceErrors and Re-renders) ---
+// --- Branding Components ---
 
-const HeaderLogo = ({ className = "w-8 h-8" }) => (
-  <div className="flex items-center gap-2 select-none">
-     <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M50 10C27.9 10 10 27.9 10 50C10 72.1 27.9 90 50 90C72.1 90 90 72.1 90 50C90 27.9 72.1 10 50 10ZM50 70C38.9 70 30 61.1 30 50C30 38.9 38.9 30 50 30C61.1 30 70 38.9 70 50C70 61.1 61.1 70 50 70Z" className="fill-black" />
-        <path d="M45 55L35 45L40 40L45 45L60 30L65 35L45 55Z" fill="#2563EB" />
-     </svg>
-     <span className="font-black text-xl tracking-tight text-gray-900">e<span className="text-blue-600">View</span></span>
-  </div>
+const HeaderLogo = ({ className = "h-20 w-auto" }) => (
+  <img 
+    src="/eView_Silhoutte.svg" 
+    alt="eView" 
+    className={`${className} select-none`}
+  />
 );
 
-const LandingLogo = ({ className = "w-16 h-16" }) => (
-  <div className="flex flex-col items-center select-none">
-     <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M50 5C25.1 5 5 25.1 5 50C5 74.9 25.1 95 50 95C74.9 95 95 74.9 95 50C95 25.1 74.9 5 50 5ZM50 75C36.2 75 25 63.8 25 50C25 36.2 36.2 25 50 25C63.8 25 75 36.2 75 50C75 63.8 63.8 75 50 75Z" className="fill-black" />
-        <path d="M45 60L35 50L40 45L45 50L60 35L65 40L45 60Z" fill="#2563EB" />
-     </svg>
-     <div className="text-5xl font-light text-gray-900 mt-4 tracking-tighter">e<span className="text-blue-600">View</span></div>
-  </div>
+const LandingLogo = ({ className = "h-32 w-auto" }) => (
+  <img 
+    src="/eView_Silhoutte_Captioned_Unbolded.svg" 
+    alt="eView Logo" 
+    // Added 'mx-auto' here 👇
+    className={`${className} select-none mb-4 mx-auto`}
+  />
 );
 
-const FooterLogo = ({ className = "w-10 h-10" }) => (
-  <div className="flex items-center gap-2 select-none">
-     <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M50 10C27.9 10 10 27.9 10 50C10 72.1 27.9 90 50 90C72.1 90 90 72.1 90 50C90 27.9 72.1 10 50 10ZM50 70C38.9 70 30 61.1 30 50C30 38.9 38.9 30 50 30C61.1 30 70 38.9 70 50C70 61.1 61.1 70 50 70Z" className="fill-white" />
-        <path d="M45 55L35 45L40 40L45 45L60 30L65 35L45 55Z" fill="#2563EB" />
-     </svg>
-     <span className="font-black text-2xl tracking-tight text-white">e<span className="text-blue-500">View</span></span>
-  </div>
+const FooterLogo = ({ className = "h-20 w-auto" }) => (
+  <img 
+    src="/eView_Silhoutte_Captioned_Inverted.svg" 
+    alt="eView" 
+    className={`${className} select-none bm-0 tm-0`}
+  />
 );
+
+// --- Helper Components ---
 
 const ComingSoonButton = ({ label, popupText, icon }) => {
   const [showPopup, setShowPopup] = useState(false);
@@ -141,28 +138,19 @@ const ComingSoonButton = ({ label, popupText, icon }) => {
 
 const ShareModal = ({ isOpen, onClose, shareText, isPositive }) => {
   if (!isOpen) return null;
-
   const url = "https://reviewereview.com"; 
   const encodedText = encodeURIComponent(shareText);
   const encodedUrl = encodeURIComponent(url);
-
   const copyToClipboard = () => {
-    const el = document.createElement('textarea');
-    el.value = shareText;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-    alert("Text copied to clipboard!");
+    const el = document.createElement('textarea'); el.value = shareText; document.body.appendChild(el);
+    el.select(); document.execCommand('copy'); document.body.removeChild(el); alert("Text copied to clipboard!");
   };
-
   const shareLinks = [
     { name: "LinkedIn", icon: <Linkedin className="w-6 h-6 text-white" />, bg: "bg-[#0077b5]", href: `https://www.linkedin.com/feed/?shareActive=true&text=${encodedText}` },
     { name: "X (Twitter)", icon: <Twitter className="w-6 h-6 text-white" />, bg: "bg-black", href: `https://twitter.com/intent/tweet?text=${encodedText}` },
     { name: "Facebook", icon: <Facebook className="w-6 h-6 text-white" />, bg: "bg-[#1877f2]", href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}` },
     { name: "Email", icon: <Mail className="w-6 h-6 text-white" />, bg: "bg-gray-600", href: `mailto:?subject=Review on eView&body=${encodedText}` }
   ];
-
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
@@ -692,10 +680,7 @@ export default function App() {
   const renderHome = () => (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <div className="text-center max-w-2xl">
-        <div className="flex items-center justify-center gap-3 mb-6">
-           <div className="bg-blue-600 text-white p-3 rounded-xl shadow-lg rotate-[-5deg]"><Eye className="w-8 h-8" /></div>
-        </div>
-        <h1 className="text-4xl md:text-6xl font-black text-gray-900 mb-6 tracking-tight leading-tight">e<span className="text-blue-600">View</span></h1>
+        <LandingLogo />
         <p className="text-xl md:text-2xl text-gray-600 mb-2 font-bold">The Professional Accountability Utility.</p>
         <p className="text-sm text-gray-400 mb-10 font-medium tracking-wide uppercase">Gossip is noise. Data is power.</p>
         <div className="relative w-full max-w-xl mx-auto mb-16 shadow-2xl rounded-full bg-white group border border-gray-100">
@@ -703,7 +688,7 @@ export default function App() {
              <span className="text-transparent whitespace-pre">{searchQuery}</span>
              {bestMatch && bestMatch.name.toLowerCase() !== searchQuery.toLowerCase() && (<span className="text-gray-300">{bestMatch.name.slice(searchQuery.length)}</span>)}
           </div>
-          <input type="text" placeholder={bestMatch ? "" : "Run a PreView check on a recruiter..."} className="relative w-full h-16 pl-14 pr-6 rounded-full border-0 bg-transparent text-lg focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-900 z-10 placeholder-gray-400"
+          <input type="text" placeholder={bestMatch ? "" : "PreView or ReView an eView..."} className="relative w-full h-16 pl-14 pr-6 rounded-full border-0 bg-transparent text-lg focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-900 z-10 placeholder-gray-400"
             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleSearchKeyDown} spellCheck="false" autoComplete="off" />
           <Search className="absolute left-5 top-5 text-gray-400 w-6 h-6 z-20" />
           {bestMatch && bestMatch.name.toLowerCase() !== searchQuery.toLowerCase() && (
@@ -737,13 +722,13 @@ export default function App() {
           <div className="space-y-12">
             {(view === 'home' || view === 'eviews') && dashboardData.recruiters.length > 0 && (
               <div>
-                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-600" /> TOP REVIEWERS</h2></div>
+                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-600" /> Top Individual eViews</h2></div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{dashboardData.recruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
               </div>
             )}
             {(view === 'home' || view === 'teams') && dashboardData.teams.length > 0 && (
               <div>
-                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2"><Building className="w-5 h-5 text-blue-600" /> TOP REVIEW TEAMS</h2></div>
+                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 flex items-center gap-2"><Building className="w-5 h-5 text-blue-600" /> Top Team eViews</h2></div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{dashboardData.teams.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
               </div>
             )}
@@ -1106,8 +1091,8 @@ export default function App() {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div onClick={() => { handleSetView('home'); setSearchQuery(''); setSelectedRecruiter(null); }} className="cursor-pointer hover:opacity-80 transition-opacity"><HeaderLogo /></div>
           <div className="hidden md:flex items-center gap-6 text-sm font-bold text-gray-600">
-            <button onClick={() => { handleSetView('eviews'); }} className="hover:text-black">eViews</button>
-            <button onClick={() => { handleSetView('teams'); }} className="hover:text-black">eView Teams</button>
+            <button onClick={() => { handleSetView('eviews'); }} className="hover:text-black">Individual eViews</button>
+            <button onClick={() => { handleSetView('teams'); }} className="hover:text-black">Team eViews</button>
             <button onClick={() => handleSetView('add')} className="text-black hover:text-blue-600">Add Profile</button>
             <div className="flex gap-2">
                <ComingSoonButton label="eViewer" popupText="eViewer coming soon" icon="🤫" />
