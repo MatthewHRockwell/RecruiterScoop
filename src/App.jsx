@@ -1,38 +1,16 @@
-import React, { 
-  useState, 
-  useEffect, 
-  useMemo 
-} from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { signInAnonymously, onAuthStateChanged,signInWithCustomToken } from 'firebase/auth';
 
 import { 
-  initializeApp 
-} from 'firebase/app';
-
-import { 
-  getAnalytics 
-} from "firebase/analytics";
-
-import { 
-  getAuth, 
-  signInAnonymously, 
-  onAuthStateChanged,
-  signInWithCustomToken
-} from 'firebase/auth';
-
-import { 
-  getFirestore, 
   collection, 
   addDoc, 
   onSnapshot, 
   query, 
-  orderBy, 
   serverTimestamp,
   doc,
   updateDoc,
   increment,
-  getDoc,
-  limit
-} from 'firebase/firestore';
+ } from 'firebase/firestore';
 
 import { 
   Search, 
@@ -45,53 +23,42 @@ import {
   Menu,
   ChevronRight,
   Lock,
-  Newspaper, 
   Info,
   Check,
   X,
   ThumbsUp,
   ThumbsDown,
-  AlertCircle,
   Share2,
-  Copy,
   ArrowRight,
-  BookOpen,
   FileText,
-  Linkedin,
-  Twitter,
-  Facebook,
   Mail,
   Link as LinkIcon,
   AlertTriangle,
   Building,
-  Eye,
   FileCheck,
   Scale,
   Award,
-  Clock,
-  Phone
-} from 'lucide-react';
+  Clock } from 'lucide-react';
 
-import { 
-  auth, 
-  db, 
-  analytics 
-} from './config/firebase';
+// 1. Import Config
+import { auth, db } from './config/firebase';
 
-import { 
-  STAGES, 
-  SCOOP_TAGS, 
-  APP_ID 
-} from './constants/data';
+// 2. Import Constants
+import { STAGES, SCOOP_TAGS, APP_ID } from './constants/data';
 
-import { 
-  getBrowserFingerprint 
-} from './utils/helper';
+// 3. Import Utils
+import { getBrowserFingerprint } from './utils/helper';
 
+// 4. Import Components (You need to create these files first!)
+//import RecruiterCard from './components/RecruiterCard';
+//import StarRating from './components/StarRating';
+//import Captcha from './components/Captcha';
+//import ShareModal from './components/ShareModal';
+//import GuidelinesModal from './components/GuidelinesModal';
+
+// ... import logos and others as needed
 import headerLogoIcon from './assets/eView_Silhoutte.svg';
-
 import LandingLogoIcon from './assets/eView_Silhoutte_Captioned_Unbolded.svg';
-
 import FooterLogoIcon from './assets/eView_Silhoutte_Captioned_Inverted.svg';
 
 
