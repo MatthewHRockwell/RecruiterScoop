@@ -136,6 +136,7 @@ const FooterLogo = ({ className = "h-20 w-auto" }) => (
 // ----------------------------------------------------------- Helper Components ------------------------------------------------------------
 
 
+
 const ComingSoonButton = ({ label, popupText, icon }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [timer, setTimer] = useState(null);
@@ -164,6 +165,7 @@ const ComingSoonButton = ({ label, popupText, icon }) => {
     </div>
   );
 };
+
 
 
 const ShareModal = ({ isOpen, onClose, shareText, isPositive }) => {
@@ -205,6 +207,7 @@ const ShareModal = ({ isOpen, onClose, shareText, isPositive }) => {
 };
 
 
+
 const GuidelinesModal = ({ isOpen, onClose, onAccept }) => {
   if (!isOpen) return null;
   return (
@@ -227,6 +230,7 @@ const GuidelinesModal = ({ isOpen, onClose, onAccept }) => {
 };
 
 
+
 const StarRating = ({ rating, setRating, interactive = true, size = "md" }) => {
   const sizeClasses = size === "lg" ? "w-8 h-8" : "w-5 h-5";
   return (
@@ -239,6 +243,7 @@ const StarRating = ({ rating, setRating, interactive = true, size = "md" }) => {
     </div>
   );
 };
+
 
 
 const Captcha = ({ onVerify }) => {
@@ -262,7 +267,6 @@ const Captcha = ({ onVerify }) => {
     </div>
   );
 };
-
 
 
 
@@ -335,13 +339,17 @@ export default function App() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [hasReviewed, setHasReviewed] = useState(false);
   const [userFingerprint, setUserFingerprint] = useState('');
-  const [submittedReview, setSubmittedReview] = useState(null);
+  const [submittedReview, setSubmittedReview] = useState(null); 
   const [rateForm, setRateForm] = useState({
     stage: '', tags: [], headline: '', comment: '', rating: 0, agreed: false, verified: false
   });
+
+
   const [addRecruiterForm, setAddRecruiterForm] = useState({
     firstName: '', lastName: '', firm: '', location: '', roleTitle: ''
   });
+
+
   const handleSetView = (newView) => {
     setView(newView);
     setCaptchaVerified(false);
@@ -352,7 +360,9 @@ export default function App() {
       setHasReviewed(false);
     }
   };
+
   useEffect(() => { window.scrollTo(0, 0); }, [view]);
+
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -363,31 +373,42 @@ export default function App() {
         }
       } catch (err) { await signInAnonymously(auth); }
     };
+
     initAuth();
+
     setUserFingerprint(getBrowserFingerprint());
+
     fetch('https://ipapi.co/json/').then(res => res.json())
       .then(data => { if (data.city) setUserLocation(data.city); })
       .catch(() => console.log('Location default: Global'));
     const unsubscribe = onAuthStateChanged(auth, setUser);
+
     return () => unsubscribe();
   }, []);
+
+
   useEffect(() => {
     if (!user) return;
+
     const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'recruiters'));
     return onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setRecruiters(data);
       setLoading(false);
     }, console.error);
+
   }, [user]);
+
   useEffect(() => {
     if (selectedRecruiter && recruiters.length > 0) {
        const liveRecord = recruiters.find(r => r.id === selectedRecruiter.id);
+
        if (liveRecord && (liveRecord.rating !== selectedRecruiter.rating || liveRecord.reviewCount !== selectedRecruiter.reviewCount)) {
          setSelectedRecruiter(prev => ({...prev, ...liveRecord}));
        }
     }
   }, [recruiters, selectedRecruiter]); 
+  
   useEffect(() => {
     if (!user || !selectedRecruiter) return;
     if (selectedRecruiter.id === 'temp_new_recruiter') {
@@ -403,6 +424,7 @@ export default function App() {
       setHasReviewed(!!myReview);
     }, console.error);
   }, [user, selectedRecruiter, userFingerprint]);
+
   const handleAddRecruiter = (e) => {
     e.preventDefault();
     if (!addRecruiterForm.firm || !addRecruiterForm.roleTitle) return;
@@ -419,18 +441,18 @@ export default function App() {
     });
     handleSetView('rate');
   };
+
+
   const handleSubmitReview = async () => {
     if (!selectedRecruiter || !captchaVerified || rateForm.rating === 0 || !rateForm.agreed) return;
     try {
       let finalRecruiterId = selectedRecruiter.id;
       let finalRecruiterName = selectedRecruiter.name;
       let finalRecruiterFirm = selectedRecruiter.firm;
-      
       const hasCriticalTags = rateForm.tags.some(tagId => {
         const tag = SCOOP_TAGS.find(t => t.id === tagId);
         return tag && tag.type === 'critical';
       });
-
       if (selectedRecruiter.id === 'temp_new_recruiter') {
          const newRecruiterData = {
             name: selectedRecruiter.name, firm: selectedRecruiter.firm, location: selectedRecruiter.location,
@@ -448,25 +470,27 @@ export default function App() {
       const currentCount = selectedRecruiter.id === 'temp_new_recruiter' ? 0 : (selectedRecruiter.reviewCount || 0);
       const currentRating = selectedRecruiter.id === 'temp_new_recruiter' ? 0 : (selectedRecruiter.rating || 0);
       const newCount = currentCount + 1;
-      const newAverage = (currentRating * currentCount + rateForm.rating) / newCount;
-      
+      const newAverage = (currentRating * currentCount + rateForm.rating) / newCount;     
       const updateData = {
         rating: newAverage, reviewCount: increment(1), lastReviewed: serverTimestamp()
       };
       if (hasCriticalTags) { updateData.criticalFlagCount = increment(1); }
-
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'recruiters', finalRecruiterId), updateData);
       setSubmittedReview({ rating: rateForm.rating, headline: rateForm.headline, recruiterName: finalRecruiterName || 'Hiring Team', firm: finalRecruiterFirm });
       setRateForm({ stage: '', tags: [], headline: '', comment: '', rating: 0, agreed: false, verified: false });
       handleSetView('success');
     } catch (err) { console.error("Error submitting review:", err); }
   };
+
+
   const handleFlagReview = async (reviewId, currentFlags) => {
     try {
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reviews', reviewId), { flags: (currentFlags || 0) + 1 });
       alert("This Review has been flagged for moderation.");
     } catch (err) { console.error(err); }
   };
+
+
   const toggleTag = (tagId) => {
     setRateForm(prev => {
       const isCritical = SCOOP_TAGS.find(t => t.id === tagId)?.type === 'critical';
@@ -477,6 +501,8 @@ export default function App() {
       return { ...prev, tags, rating };
     });
   };
+
+
   const bestMatch = useMemo(() => {
     if (!searchQuery || searchQuery.length < 2) return null;
     const searchLower = searchQuery.toLowerCase();
@@ -484,6 +510,8 @@ export default function App() {
     if (matches.length === 0) return null;
     return matches.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0))[0];
   }, [recruiters, searchQuery]);
+
+
   const handleSearchKeyDown = (e) => {
     if ((e.key === 'Tab' || e.key === 'ArrowRight') && bestMatch) {
       e.preventDefault();
@@ -496,6 +524,8 @@ export default function App() {
       else if (bestMatch && bestMatch.name.toLowerCase() === searchQuery.toLowerCase()) { setSelectedRecruiter(bestMatch); handleSetView('recruiter'); }
     }
   };
+
+
   const filteredRecruiters = useMemo(() => {
     const searchLower = searchQuery.toLowerCase();
     const matches = recruiters.filter(r => r.name?.toLowerCase().includes(searchLower) || r.firm?.toLowerCase().includes(searchLower));
@@ -507,6 +537,8 @@ export default function App() {
       return (b.reviewCount || 0) - (a.reviewCount || 0);
     });
   }, [recruiters, searchQuery]);
+
+
   const dashboardData = useMemo(() => {
     if (searchQuery) return { recruiters: [], teams: [] };
     const isCriticalProfile = (r) => {
@@ -530,7 +562,11 @@ export default function App() {
     const hiringTeams = recruiters.filter(r => !r.name || r.name.trim() === '');
     return { recruiters: namedRecruiters.sort(ranker).slice(0, 8), teams: hiringTeams.sort(ranker).slice(0, 8) };
   }, [recruiters, userLocation, searchQuery]);
+
+
   const showAutoAddProfile = searchQuery.length > 0 && filteredRecruiters.length === 0;
+
+
   const copyToClipboard = (text) => {
     const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el);
     el.select(); document.execCommand('copy'); document.body.removeChild(el); alert("Text copied!");
@@ -551,6 +587,8 @@ export default function App() {
       </div>
     </div>
   );
+
+
   const renderBlog = () => (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <h1 className="text-3xl md:text-4xl font-black mb-8">Intel Blog</h1>
@@ -566,6 +604,8 @@ export default function App() {
       </div>
     </div>
   );
+
+
   const renderLegal = (type) => (
     <div className="max-w-3xl mx-auto px-4 py-12 prose prose-blue">
       <h1 className="text-2xl md:text-3xl font-black mb-6">{type === 'privacy' ? 'Privacy Policy' : 'Terms of Use'}</h1>
@@ -573,6 +613,8 @@ export default function App() {
       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-500">This is a placeholder legal document for the prototype.</div>
     </div>
   );
+
+
   const renderAddRecruiter = () => (
     <div className="max-w-xl mx-auto px-4 py-8">
        <button onClick={() => handleSetView('home')} className="mb-6 text-gray-500 hover:text-gray-900 flex items-center gap-1 text-sm font-medium"><ChevronRight className="w-4 h-4 rotate-180" /> Back</button>
@@ -614,6 +656,8 @@ export default function App() {
       </div>
     </div>
   );
+
+
   const renderSuccess = () => {
     if (!submittedReview) return null;
     const isPositive = submittedReview.rating >= 4;
@@ -657,6 +701,8 @@ export default function App() {
       </div>
     );
   };
+
+
   const renderHome = () => (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <div className="text-center max-w-2xl">
@@ -723,6 +769,8 @@ export default function App() {
       </div>
     </div>
   );
+
+
   const renderRecruiterProfile = () => (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <button onClick={() => handleSetView('home')} className="mb-6 text-gray-500 hover:text-gray-900 flex items-center gap-1 text-sm font-medium">
@@ -860,6 +908,8 @@ export default function App() {
       />
     </div>
   );
+
+
   const renderRateForm = () => {
     const MAX_WORDS = 300;
     const wordCount = rateForm.comment.trim() ? rateForm.comment.trim().split(/\s+/).length : 0;
