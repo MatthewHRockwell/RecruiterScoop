@@ -9,20 +9,17 @@ import {
   serverTimestamp,
   doc,
   updateDoc,
-  increment,
+  increment
  } from 'firebase/firestore';
 
 import { 
   Search, 
-  Star, 
   UserPlus, 
   Briefcase, 
   MapPin, 
   Flag, 
-  Shield,
   Menu,
   ChevronRight,
-  Lock,
   Info,
   Check,
   X,
@@ -31,14 +28,11 @@ import {
   Share2,
   ArrowRight,
   FileText,
-  Mail,
-  Link as LinkIcon,
   AlertTriangle,
   Building,
   FileCheck,
-  Scale,
-  Award,
-  Clock } from 'lucide-react';
+  Scale
+ } from 'lucide-react';
 
 // 1. Import Config
 import { auth, db } from './config/firebase';
@@ -50,11 +44,12 @@ import { STAGES, SCOOP_TAGS, APP_ID } from './constants/data';
 import { getBrowserFingerprint } from './utils/helper';
 
 // 4. Import Components (You need to create these files first!)
-//import RecruiterCard from './components/RecruiterCard';
-//import StarRating from './components/StarRating';
-//import Captcha from './components/Captcha';
-//import ShareModal from './components/ShareModal';
-//import GuidelinesModal from './components/GuidelinesModal';
+import RecruiterCard from './components/RecruiterCard';
+import StarRating from './components/StarRating';
+import Captcha from './components/Captcha';
+import ShareModal from './components/ShareModal';
+import GuidelinesModal from './components/GuidelinesModal';
+import ComingSoonButton from './components/ComingSoonButton';
 
 // ... import logos and others as needed
 import headerLogoIcon from './assets/eView_Silhoutte.svg';
@@ -64,11 +59,11 @@ import FooterLogoIcon from './assets/eView_Silhoutte_Captioned_Inverted.svg';
 
 
 
-// ---------------------------------------------------------- Branding Components -----------------------------------------------------------
 
 
 const appId = APP_ID;
 
+// ---------------------------------------------------------- Branding Components -----------------------------------------------------------
 
 const HeaderLogo = ({ className = "h-20 w-auto" }) => (
   <img 
@@ -96,195 +91,6 @@ const FooterLogo = ({ className = "h-20 w-auto" }) => (
     className={`${className} select-none bm-0 tm-0`}
   />
 );
-
-
-
-
-// ----------------------------------------------------------- Helper Components ------------------------------------------------------------
-
-
-
-const ComingSoonButton = ({ label, popupText, icon }) => {
-  const [showPopup, setShowPopup] = useState(false);
-  const [timer, setTimer] = useState(null);
-  const handleMouseEnter = () => {
-    const t = setTimeout(() => setShowPopup(true), 50); 
-    setTimer(t);
-  };
-  const handleMouseLeave = () => {
-    clearTimeout(timer);
-    setShowPopup(false);
-  };
-  return (
-    <div className="relative">
-      <button 
-        onMouseEnter={handleMouseEnter} 
-        onMouseLeave={handleMouseLeave}
-        className="bg-black text-white px-5 py-2 rounded-full cursor-not-allowed font-bold"
-      >
-        {label}
-      </button>
-      {showPopup && (
-        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-black text-white text-xs p-2 rounded shadow-lg z-50 text-center animate-in fade-in zoom-in duration-200">
-          {popupText} <span className="text-lg">{icon}</span>
-        </div>
-      )}
-    </div>
-  );
-};
-
-
-
-const ShareModal = ({ isOpen, onClose, shareText, isPositive }) => {
-  if (!isOpen) return null;
-  const url = "https://reviewereview.com"; 
-  const encodedText = encodeURIComponent(shareText);
-  const encodedUrl = encodeURIComponent(url);
-  const copyToClipboard = () => {
-    const el = document.createElement('textarea'); el.value = shareText; document.body.appendChild(el);
-    el.select(); document.execCommand('copy'); document.body.removeChild(el); alert("Text copied to clipboard!");
-  };
-  const shareLinks = [
-    { name: "LinkedIn", icon: <Linkedin className="w-6 h-6 text-white" />, bg: "bg-[#0077b5]", href: `https://www.linkedin.com/feed/?shareActive=true&text=${encodedText}` },
-    { name: "X (Twitter)", icon: <Twitter className="w-6 h-6 text-white" />, bg: "bg-black", href: `https://twitter.com/intent/tweet?text=${encodedText}` },
-    { name: "Facebook", icon: <Facebook className="w-6 h-6 text-white" />, bg: "bg-[#1877f2]", href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}` },
-    { name: "Email", icon: <Mail className="w-6 h-6 text-white" />, bg: "bg-gray-600", href: `mailto:?subject=Review on eView&body=${encodedText}` }
-  ];
-  return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-6 h-6" /></button>
-        <div className="text-center mb-8">
-           <h2 className="text-2xl font-black text-gray-900">Share the eView</h2>
-        </div>
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          {shareLinks.map((link) => (
-            <a key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" className={`${link.bg} p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-opacity group`}>
-              <div className="group-hover:scale-110 transition-transform duration-200">{link.icon}</div><span className="text-white font-bold text-sm">{link.name}</span>
-            </a>
-          ))}
-        </div>
-        <div className="mt-6 flex gap-2">
-          <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-600 truncate">{url}</div>
-          <button onClick={copyToClipboard} className="bg-gray-900 text-white px-4 rounded-lg font-bold text-sm hover:bg-gray-800 transition-colors flex items-center gap-2"><LinkIcon className="w-4 h-4" /> Copy</button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
-
-const GuidelinesModal = ({ isOpen, onClose, onAccept }) => {
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-lg w-full p-6 shadow-xl border-t-4 border-blue-600">
-        <div className="flex items-center gap-2 mb-4 text-gray-900"><Scale className="w-6 h-6 text-blue-600" /><h2 className="text-xl font-bold">Review Standards</h2></div>
-        <p className="text-gray-600 mb-4 text-sm">eView is a professional accountability utility. To maintain data quality:</p>
-        <ul className="space-y-3 mb-6 text-sm text-gray-700">
-          <li className="flex gap-2"><Check className="w-4 h-4 text-green-500 shrink-0" /><span><strong>Focus on Process:</strong> Rate based on milestones.</span></li>
-          <li className="flex gap-2"><Check className="w-4 h-4 text-green-500 shrink-0" /><span><strong>Be Objective:</strong> Avoid emotional language.</span></li>
-          <li className="flex gap-2"><Shield className="w-4 h-4 text-blue-500 shrink-0" /><span><strong>Verifiable:</strong> You affirm you have evidence if requested.</span></li>
-        </ul>
-        <div className="flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-md">Cancel</button>
-          <button onClick={onAccept} className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium">Accept Standards</button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
-
-const StarRating = ({ rating, setRating, interactive = true, size = "md" }) => {
-  const sizeClasses = size === "lg" ? "w-8 h-8" : "w-5 h-5";
-  return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button key={star} type="button" disabled={!interactive} onClick={() => interactive && setRating(star)} className={`focus:outline-none transition-transform ${interactive ? 'hover:scale-110' : 'cursor-default'}`}>
-          <Star className={`${sizeClasses} ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} fill={star <= rating ? "currentColor" : "none"} />
-        </button>
-      ))}
-    </div>
-  );
-};
-
-
-
-const Captcha = ({ onVerify }) => {
-  const [num1] = useState(Math.floor(Math.random() * 10) + 1);
-  const [num2] = useState(Math.floor(Math.random() * 10) + 1);
-  const [val, setVal] = useState('');
-  const handleChange = (e) => {
-    const input = e.target.value;
-    if (!/^\d*$/.test(input)) return;
-    setVal(input);
-    if (parseInt(input) === num1 + num2) { onVerify(true); } else { onVerify(false); }
-  };
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 mt-4">
-      <div className="flex items-center gap-2"><Lock className="w-4 h-4 text-gray-400" /><span className="text-sm font-bold text-gray-600 uppercase tracking-wide">Human Check</span></div>
-      <div className="flex items-center gap-3">
-        <div className="bg-white px-4 py-2 rounded-lg border border-gray-300 font-mono font-bold text-gray-800 select-none shadow-sm">{num1} + {num2} = ?</div>
-        <input type="text" inputMode="numeric" value={val} onChange={handleChange} placeholder="Sum" className="w-24 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-center font-bold text-gray-800" />
-        {parseInt(val) === num1 + num2 && <Shield className="w-6 h-6 text-green-500 animate-bounce" />}
-      </div>
-    </div>
-  );
-};
-
-
-
-// ---------------------------------------------------------- Reusable Card Component --------------------------------------------------------
-
-
-const RecruiterCard = ({ recruiter, onClick }) => {
-  const isVerified = (recruiter.rating >= 4.5) && (recruiter.reviewCount >= 5);
-  // Flag Logic: >10% Critical Reviews
-  const criticalCount = recruiter.criticalFlagCount || 0;
-  const totalReviews = recruiter.reviewCount || 0;
-  const isFlagged = totalReviews > 0 && (criticalCount / totalReviews) >= 0.10;
-  const getDateString = () => {
-    if (!recruiter.lastReviewed) return 'Recently';
-    return new Date(recruiter.lastReviewed.seconds * 1000).toLocaleDateString();
-  };
-  const getRatingStyle = (r) => {
-     if (r >= 4.0) return "bg-gradient-to-br from-green-300 to-green-500";
-     if (r >= 3.0) return "bg-gradient-to-br from-yellow-300 to-yellow-500";
-     return "bg-gradient-to-br from-red-300 to-red-500";
-  };
-  return (
-    <div onClick={onClick} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden">
-      <div className="absolute top-0 right-0 p-4 flex flex-col items-end gap-2">
-        {isFlagged ? (
-          <div className="bg-red-100 text-red-600 w-12 h-12 rounded-lg border border-red-200 shadow-sm flex items-center justify-center" title="High volume of safety flags reported">
-            <AlertTriangle className="w-6 h-6" />
-          </div>
-        ) : (
-          <div className={`text-black font-black text-xl w-12 h-12 flex items-center justify-center rounded-lg shadow-sm ${getRatingStyle(recruiter.rating || 0)}`}>
-            {typeof recruiter.rating === 'number' ? recruiter.rating.toFixed(1) : '-'}
-          </div>
-        )}
-        {isVerified && !isFlagged && <div className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1"><Award className="w-3 h-3" /> VERIFIED</div>}
-      </div>
-      <div className="pr-16">
-        <h3 className="font-bold text-lg text-gray-900 mb-1 leading-tight">{recruiter.name || "Hiring Team"}</h3>
-        <div className="text-gray-500 text-sm flex items-center gap-2 mb-2"><Building className="w-3 h-3" /> {recruiter.firm}</div>
-        <div className="flex flex-col gap-1">
-            {recruiter.location && <div className="flex items-center gap-2 text-xs text-gray-400"><MapPin className="w-3 h-3" /> {recruiter.location}</div>}
-            {recruiter.lastReviewed && <div className="flex items-center gap-2 text-xs text-gray-400"><Clock className="w-3 h-3" /> {getDateString()}</div>}
-        </div>
-        <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
-            {recruiter.roleTitle && <div className="flex items-center gap-2 text-xs font-bold text-blue-600"><Briefcase className="w-3 h-3" /> {recruiter.roleTitle}</div>}
-            <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider"><span>{recruiter.reviewCount || 0} {recruiter.reviewCount === 1 ? 'Review' : 'Reviews'}</span></div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 
 
 
