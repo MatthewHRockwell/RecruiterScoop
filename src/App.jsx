@@ -1,12 +1,24 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAnalytics } from "firebase/analytics";
+import React, { 
+  useState, 
+  useEffect, 
+  useMemo 
+} from 'react';
+
+import { 
+  initializeApp 
+} from 'firebase/app';
+
+import { 
+  getAnalytics 
+} from "firebase/analytics";
+
 import { 
   getAuth, 
   signInAnonymously, 
   onAuthStateChanged,
   signInWithCustomToken
 } from 'firebase/auth';
+
 import { 
   getFirestore, 
   collection, 
@@ -21,6 +33,7 @@ import {
   getDoc,
   limit
 } from 'firebase/firestore';
+
 import { 
   Search, 
   Star, 
@@ -58,20 +71,28 @@ import {
   Clock,
   Phone
 } from 'lucide-react';
-import { auth, db, analytics } from './config/firebase';
-import { STAGES, SCOOP_TAGS } from './constants/data';
-import { getBrowserFingerprint } from './utils/helper';
-// You can keep appId here or move it to constants/data.js
-const appId = 'recruiter-scoop';
 
+import { 
+  auth, 
+  db, 
+  analytics 
+} from './config/firebase';
 
+import { 
+  STAGES, 
+  SCOOP_TAGS, 
+  APP_ID 
+} from './constants/data';
 
+import { 
+  getBrowserFingerprint 
+} from './utils/helper';
 
-// ---------------------------------------------------------------- Utilities --------------------------------------------------------------
+import headerLogoIcon from './assets/eView_Silhoutte.svg';
 
+import LandingLogoIcon from './assets/eView_Silhoutte_Captioned_Unbolded.svg';
 
-
-
+import FooterLogoIcon from './assets/eView_Silhoutte_Captioned_Inverted.svg';
 
 
 
@@ -79,28 +100,31 @@ const appId = 'recruiter-scoop';
 // ---------------------------------------------------------- Branding Components -----------------------------------------------------------
 
 
+const appId = APP_ID;
 
 
 const HeaderLogo = ({ className = "h-20 w-auto" }) => (
   <img 
-    src="/eView_Silhoutte.svg" 
+    src={headerLogoIcon} 
     alt="eView" 
     className={`${className} select-none`}
   />
 );
 
+
 const LandingLogo = ({ className = "h-40 w-auto" }) => (
   <img 
-    src="/eView_Silhoutte_Captioned_Unbolded.svg" 
+    src={LandingLogoIcon} 
     alt="eView Logo" 
     // CHANGE 'mb-4' to 'mb-0' or remove it entirely 👇
-    className={`${className} select-none mb-0 mx-auto`}
+    className={`${className} select-none mx-auto`}
   />
 );
 
+
 const FooterLogo = ({ className = "h-20 w-auto" }) => (
   <img 
-    src="/eView_Silhoutte_Captioned_Inverted.svg" 
+    src={FooterLogoIcon} 
     alt="eView" 
     className={`${className} select-none bm-0 tm-0`}
   />
@@ -109,27 +133,20 @@ const FooterLogo = ({ className = "h-20 w-auto" }) => (
 
 
 
-
 // ----------------------------------------------------------- Helper Components ------------------------------------------------------------
-
-
-
 
 
 const ComingSoonButton = ({ label, popupText, icon }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [timer, setTimer] = useState(null);
-
   const handleMouseEnter = () => {
     const t = setTimeout(() => setShowPopup(true), 50); 
     setTimer(t);
   };
-
   const handleMouseLeave = () => {
     clearTimeout(timer);
     setShowPopup(false);
   };
-
   return (
     <div className="relative">
       <button 
@@ -147,6 +164,7 @@ const ComingSoonButton = ({ label, popupText, icon }) => {
     </div>
   );
 };
+
 
 const ShareModal = ({ isOpen, onClose, shareText, isPositive }) => {
   if (!isOpen) return null;
@@ -186,6 +204,7 @@ const ShareModal = ({ isOpen, onClose, shareText, isPositive }) => {
   );
 };
 
+
 const GuidelinesModal = ({ isOpen, onClose, onAccept }) => {
   if (!isOpen) return null;
   return (
@@ -207,6 +226,7 @@ const GuidelinesModal = ({ isOpen, onClose, onAccept }) => {
   );
 };
 
+
 const StarRating = ({ rating, setRating, interactive = true, size = "md" }) => {
   const sizeClasses = size === "lg" ? "w-8 h-8" : "w-5 h-5";
   return (
@@ -219,6 +239,7 @@ const StarRating = ({ rating, setRating, interactive = true, size = "md" }) => {
     </div>
   );
 };
+
 
 const Captcha = ({ onVerify }) => {
   const [num1] = useState(Math.floor(Math.random() * 10) + 1);
@@ -248,26 +269,21 @@ const Captcha = ({ onVerify }) => {
 // ---------------------------------------------------------- Reusable Card Component --------------------------------------------------------
 
 
-
-
 const RecruiterCard = ({ recruiter, onClick }) => {
   const isVerified = (recruiter.rating >= 4.5) && (recruiter.reviewCount >= 5);
   // Flag Logic: >10% Critical Reviews
   const criticalCount = recruiter.criticalFlagCount || 0;
   const totalReviews = recruiter.reviewCount || 0;
   const isFlagged = totalReviews > 0 && (criticalCount / totalReviews) >= 0.10;
-
   const getDateString = () => {
     if (!recruiter.lastReviewed) return 'Recently';
     return new Date(recruiter.lastReviewed.seconds * 1000).toLocaleDateString();
   };
-
   const getRatingStyle = (r) => {
      if (r >= 4.0) return "bg-gradient-to-br from-green-300 to-green-500";
      if (r >= 3.0) return "bg-gradient-to-br from-yellow-300 to-yellow-500";
      return "bg-gradient-to-br from-red-300 to-red-500";
   };
-  
   return (
     <div onClick={onClick} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 flex flex-col items-end gap-2">
@@ -301,21 +317,7 @@ const RecruiterCard = ({ recruiter, onClick }) => {
 
 
 
-// --------------------------------------------------------------- Configuration ------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
 // ----------------------------------------------------------------- MAIN APP ------------------------------------------------------------
-
-
 
 
 export default function App() {
@@ -334,14 +336,12 @@ export default function App() {
   const [hasReviewed, setHasReviewed] = useState(false);
   const [userFingerprint, setUserFingerprint] = useState('');
   const [submittedReview, setSubmittedReview] = useState(null);
-
   const [rateForm, setRateForm] = useState({
     stage: '', tags: [], headline: '', comment: '', rating: 0, agreed: false, verified: false
   });
   const [addRecruiterForm, setAddRecruiterForm] = useState({
     firstName: '', lastName: '', firm: '', location: '', roleTitle: ''
   });
-
   const handleSetView = (newView) => {
     setView(newView);
     setCaptchaVerified(false);
@@ -352,9 +352,7 @@ export default function App() {
       setHasReviewed(false);
     }
   };
-
   useEffect(() => { window.scrollTo(0, 0); }, [view]);
-
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -373,7 +371,6 @@ export default function App() {
     const unsubscribe = onAuthStateChanged(auth, setUser);
     return () => unsubscribe();
   }, []);
-
   useEffect(() => {
     if (!user) return;
     const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'recruiters'));
@@ -383,7 +380,6 @@ export default function App() {
       setLoading(false);
     }, console.error);
   }, [user]);
-
   useEffect(() => {
     if (selectedRecruiter && recruiters.length > 0) {
        const liveRecord = recruiters.find(r => r.id === selectedRecruiter.id);
@@ -392,7 +388,6 @@ export default function App() {
        }
     }
   }, [recruiters, selectedRecruiter]); 
-
   useEffect(() => {
     if (!user || !selectedRecruiter) return;
     if (selectedRecruiter.id === 'temp_new_recruiter') {
@@ -408,7 +403,6 @@ export default function App() {
       setHasReviewed(!!myReview);
     }, console.error);
   }, [user, selectedRecruiter, userFingerprint]);
-
   const handleAddRecruiter = (e) => {
     e.preventDefault();
     if (!addRecruiterForm.firm || !addRecruiterForm.roleTitle) return;
@@ -425,7 +419,6 @@ export default function App() {
     });
     handleSetView('rate');
   };
-
   const handleSubmitReview = async () => {
     if (!selectedRecruiter || !captchaVerified || rateForm.rating === 0 || !rateForm.agreed) return;
     try {
@@ -468,14 +461,12 @@ export default function App() {
       handleSetView('success');
     } catch (err) { console.error("Error submitting review:", err); }
   };
-
   const handleFlagReview = async (reviewId, currentFlags) => {
     try {
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reviews', reviewId), { flags: (currentFlags || 0) + 1 });
       alert("This Review has been flagged for moderation.");
     } catch (err) { console.error(err); }
   };
-
   const toggleTag = (tagId) => {
     setRateForm(prev => {
       const isCritical = SCOOP_TAGS.find(t => t.id === tagId)?.type === 'critical';
@@ -486,7 +477,6 @@ export default function App() {
       return { ...prev, tags, rating };
     });
   };
-
   const bestMatch = useMemo(() => {
     if (!searchQuery || searchQuery.length < 2) return null;
     const searchLower = searchQuery.toLowerCase();
@@ -494,7 +484,6 @@ export default function App() {
     if (matches.length === 0) return null;
     return matches.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0))[0];
   }, [recruiters, searchQuery]);
-
   const handleSearchKeyDown = (e) => {
     if ((e.key === 'Tab' || e.key === 'ArrowRight') && bestMatch) {
       e.preventDefault();
@@ -507,7 +496,6 @@ export default function App() {
       else if (bestMatch && bestMatch.name.toLowerCase() === searchQuery.toLowerCase()) { setSelectedRecruiter(bestMatch); handleSetView('recruiter'); }
     }
   };
-
   const filteredRecruiters = useMemo(() => {
     const searchLower = searchQuery.toLowerCase();
     const matches = recruiters.filter(r => r.name?.toLowerCase().includes(searchLower) || r.firm?.toLowerCase().includes(searchLower));
@@ -519,7 +507,6 @@ export default function App() {
       return (b.reviewCount || 0) - (a.reviewCount || 0);
     });
   }, [recruiters, searchQuery]);
-
   const dashboardData = useMemo(() => {
     if (searchQuery) return { recruiters: [], teams: [] };
     const isCriticalProfile = (r) => {
@@ -543,23 +530,14 @@ export default function App() {
     const hiringTeams = recruiters.filter(r => !r.name || r.name.trim() === '');
     return { recruiters: namedRecruiters.sort(ranker).slice(0, 8), teams: hiringTeams.sort(ranker).slice(0, 8) };
   }, [recruiters, userLocation, searchQuery]);
-
   const showAutoAddProfile = searchQuery.length > 0 && filteredRecruiters.length === 0;
-
   const copyToClipboard = (text) => {
     const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el);
     el.select(); document.execCommand('copy'); document.body.removeChild(el); alert("Text copied!");
   };
 
-
-
-
-
   // -------------------------------------------------- Render Functions (Internal) ---------------------------------------------------------
-
-
   
-
   const renderContact = () => (
     <div className="max-w-2xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-black mb-6">Contact Us</h1>
@@ -573,7 +551,6 @@ export default function App() {
       </div>
     </div>
   );
-
   const renderBlog = () => (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <h1 className="text-3xl md:text-4xl font-black mb-8">Intel Blog</h1>
@@ -589,7 +566,6 @@ export default function App() {
       </div>
     </div>
   );
-
   const renderLegal = (type) => (
     <div className="max-w-3xl mx-auto px-4 py-12 prose prose-blue">
       <h1 className="text-2xl md:text-3xl font-black mb-6">{type === 'privacy' ? 'Privacy Policy' : 'Terms of Use'}</h1>
@@ -597,7 +573,6 @@ export default function App() {
       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-500">This is a placeholder legal document for the prototype.</div>
     </div>
   );
-
   const renderAddRecruiter = () => (
     <div className="max-w-xl mx-auto px-4 py-8">
        <button onClick={() => handleSetView('home')} className="mb-6 text-gray-500 hover:text-gray-900 flex items-center gap-1 text-sm font-medium"><ChevronRight className="w-4 h-4 rotate-180" /> Back</button>
@@ -639,7 +614,6 @@ export default function App() {
       </div>
     </div>
   );
-
   const renderSuccess = () => {
     if (!submittedReview) return null;
     const isPositive = submittedReview.rating >= 4;
@@ -683,7 +657,6 @@ export default function App() {
       </div>
     );
   };
-
   const renderHome = () => (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <div className="text-center max-w-2xl">
@@ -750,13 +723,11 @@ export default function App() {
       </div>
     </div>
   );
-
   const renderRecruiterProfile = () => (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <button onClick={() => handleSetView('home')} className="mb-6 text-gray-500 hover:text-gray-900 flex items-center gap-1 text-sm font-medium">
         <ChevronRight className="w-4 h-4 rotate-180" /> Back to Dashboard
       </button>
-
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-2 h-full bg-blue-600"></div>
         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
@@ -770,7 +741,6 @@ export default function App() {
               <span className="flex items-center gap-2"><MapPin className="w-5 h-5 text-gray-400" /> {selectedRecruiter.location || 'Location Not Listed'}</span>
             </div>
           </div>
-          
           <div className="flex gap-4 items-center">
              <div className="text-right hidden md:block">
                 <div className="text-sm font-bold text-gray-400 uppercase tracking-wider">Overall Score</div>
@@ -786,7 +756,6 @@ export default function App() {
           </div>
         </div>
       </div>
-
       <div className="flex justify-between items-center mb-8 bg-gray-50 p-4 rounded-xl border border-gray-200">
         <div>
           <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -809,7 +778,6 @@ export default function App() {
           </button>
         )}
       </div>
-
       <div className="space-y-6">
         {reviews.length > 0 ? reviews.map(review => (
           <div key={review.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative">
@@ -833,7 +801,6 @@ export default function App() {
                  )}
                </div>
             </div>
-
             <div className="flex flex-wrap gap-2 mb-4">
               {review.tags && review.tags.map(tagId => {
                 const tagDef = SCOOP_TAGS.find(t => t.id === tagId);
@@ -854,7 +821,6 @@ export default function App() {
                 ) : null;
               })}
             </div>
-
             {review.comment && (
               <div className="mt-4 pt-4 border-t border-gray-50">
                 <p className="text-gray-700 leading-relaxed font-light">
@@ -862,7 +828,6 @@ export default function App() {
                 </p>
               </div>
             )}
-            
             <button 
               onClick={() => handleFlagReview(review.id, review.flags)}
               className="absolute top-6 right-6 text-gray-300 hover:text-red-500"
@@ -885,7 +850,6 @@ export default function App() {
           </div>
         )}
       </div>
-
       <GuidelinesModal 
         isOpen={showGuidelines} 
         onClose={() => setShowGuidelines(false)}
@@ -896,17 +860,14 @@ export default function App() {
       />
     </div>
   );
-
   const renderRateForm = () => {
     const MAX_WORDS = 300;
     const wordCount = rateForm.comment.trim() ? rateForm.comment.trim().split(/\s+/).length : 0;
-    
     return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <button onClick={() => handleSetView('recruiter')} className="mb-6 text-gray-500 hover:text-gray-900 flex items-center gap-1 text-sm font-medium">
         <ChevronRight className="w-4 h-4 rotate-180" /> Cancel
       </button>
-
       <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
         <div className="mb-10 border-b pb-6">
           <div className="flex items-center gap-3 mb-2">
@@ -915,12 +876,10 @@ export default function App() {
           </div>
           <p className="text-gray-500 text-lg">You are reviewing the process for <span className="font-bold text-gray-900">{selectedRecruiter.name || "Hiring Team"}</span> at {selectedRecruiter.firm}</p>
         </div>
-
         {/* 1. Milestones */}
         <div className="mb-12">
           <h3 className="text-lg font-black text-gray-900 mb-1">1. Process Milestones</h3>
-          <p className="text-sm text-gray-500 mb-4">Identify objective facts about the interaction.</p>
-          
+          <p className="text-sm text-gray-500 mb-4">Identify objective facts about the interaction.</p>         
           <div className="grid md:grid-cols-2 gap-6">
             {/* Wins */}
             <div className="space-y-3">
@@ -945,7 +904,6 @@ export default function App() {
                  </button>
                ))}
             </div>
-
             {/* Gaps */}
             <div className="space-y-3">
                <div className="flex items-center gap-2 text-red-700 font-bold text-xs uppercase tracking-wider mb-2">
@@ -969,7 +927,6 @@ export default function App() {
                  </button>
                ))}
             </div>
-
             {/* Critical */}
             <div className="space-y-3 col-span-full mt-4 pt-4 border-t border-gray-100">
                <div className="flex items-center gap-2 text-red-600 font-black text-xs uppercase tracking-wider mb-2">
@@ -997,11 +954,9 @@ export default function App() {
             </div>
           </div>
         </div>
-
         {/* 2. Headline & Context */}
         <div className="mb-12">
-          <h3 className="text-lg font-black text-gray-900 mb-4">2. Context</h3>
-          
+          <h3 className="text-lg font-black text-gray-900 mb-4">2. Context</h3>          
           <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
             {STAGES.map(stage => (
               <button
@@ -1017,14 +972,12 @@ export default function App() {
               </button>
             ))}
           </div>
-
           <input 
             className="w-full text-xl font-bold p-4 border-b-2 border-gray-200 focus:border-black outline-none bg-transparent placeholder-gray-300 mb-6 transition-colors"
             placeholder="Headline (e.g. Professional and transparent process)"
             value={rateForm.headline}
             onChange={e => setRateForm({...rateForm, headline: e.target.value})}
-          />
-          
+          />          
           <textarea 
             rows={4}
             className="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
@@ -1038,14 +991,12 @@ export default function App() {
              </span>
           </div>
         </div>
-
         {/* 3. Verification & Rating */}
         <div className="mb-10 bg-gray-900 p-6 rounded-xl text-center text-white">
           <label className="block text-sm font-bold uppercase tracking-widest text-gray-400 mb-3">Final Verdict</label>
           <div className="flex justify-center mb-4">
             <StarRating rating={rateForm.rating} setRating={(r) => setRateForm({...rateForm, rating: r})} size="lg" />
-          </div>
-          
+          </div>         
           <div className="flex items-center justify-center gap-3 mt-6 pt-6 border-t border-gray-800">
             <input 
               type="checkbox" 
@@ -1059,9 +1010,7 @@ export default function App() {
             </label>
           </div>
         </div>
-
         <Captcha onVerify={setCaptchaVerified} />
-
         <div className="mb-8 mt-6 flex gap-3 items-start">
           <input 
             type="checkbox" 
@@ -1074,7 +1023,6 @@ export default function App() {
             I certify this review is based on a genuine interaction and adheres to eView standards.
           </label>
         </div>
-
         <button 
           onClick={handleSubmitReview}
           disabled={!rateForm.stage || !rateForm.headline || rateForm.rating === 0 || !rateForm.agreed || wordCount > MAX_WORDS || !captchaVerified}
@@ -1091,15 +1039,7 @@ export default function App() {
   );
   };
 
-
-
-
-
   // ---------------------------------------------------------- Main Render -----------------------------------------------------------------
-
-
-
-
 
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">
