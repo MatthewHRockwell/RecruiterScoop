@@ -26,3 +26,6 @@ Thumbs.db
 !.vscode/extensions.json
 .idea
 *.sw?
+
+# Firebase cache
+.firebase
