@@ -15,38 +15,19 @@ import Captcha from './components/Captcha';
 import ShareModal from './components/ShareModal';
 import GuidelinesModal from './components/GuidelinesModal';
 import ComingSoonButton from './components/ComingSoonButton';
-// 5. import logos and others as needed
-import headerLogoIcon from './assets/eView_Silhoutte.svg';
-import LandingLogoIcon from './assets/eView_Silhoutte_Captioned_Unbolded.svg';
-import FooterLogoIcon from './assets/eView_Silhoutte_Captioned_Inverted.svg';
+import { HeaderLogo, LandingLogo, FooterLogo } from './components/Logos';
+import Layout from './components/Layout';
+import { ContactPage, BlogPage, LegalPage } from './components/StaticPages';
+import Home from './components/Home';
+import RecruiterProfile from './components/RecruiterProfile';
+import RateForm from './components/RateForm';
+import AddRecruiter from './components/AddRecruiter';
+
+
 
 const appId = APP_ID;
 
-// ---------------------------------------------------------- Define Logos
 
-const HeaderLogo = ({ className = "h-20 w-auto" }) => (
-  <img 
-    src={headerLogoIcon} 
-    alt="eView" 
-    className={`${className} select-none`}
-  />
-);
-
-const LandingLogo = ({ className = "h-40 w-auto" }) => (
-  <img 
-    src={LandingLogoIcon} 
-    alt="eView Logo" 
-    className={`${className} select-none mx-auto`}
-  />
-);
-
-const FooterLogo = ({ className = "h-20 w-auto" }) => (
-  <img 
-    src={FooterLogoIcon} 
-    alt="eView" 
-    className={`${className} select-none bm-0 tm-0`}
-  />
-);
 
 // ----------------------------------------------------------  MAIN APP 
 
@@ -288,85 +269,7 @@ export default function App() {
 
  // ----------------------------------------------------------  Render Functions (Internal) 
   
-  const renderContact = () => (
-    <div className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-black mb-6">Contact Us</h1>
-      <p className="text-gray-600 mb-8">We are here to help. Reach out with questions or feedback.</p>
-      <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 space-y-4">
-         <div><label className="block text-sm font-bold text-gray-700 mb-1">Name</label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200" placeholder="Your Name" /></div>
-         <div><label className="block text-sm font-bold text-gray-700 mb-1">Email</label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200" placeholder="you@example.com" /></div>
-         <div><label className="block text-sm font-bold text-gray-700 mb-1">Phone</label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200" placeholder="(555) 555-5555" /></div>
-         <div><label className="block text-sm font-bold text-gray-700 mb-1">Message</label><textarea className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 h-32" placeholder="How can we help?" /></div>
-         <a href="mailto:contact@RevieweReView.com" className="block text-center w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors">Send Message via Email</a>
-      </div>
-    </div>
-  );
 
-  const renderBlog = () => (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-3xl md:text-4xl font-black mb-8">Intel Blog</h1>
-      <div className="grid gap-8">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-sm font-bold text-blue-600 mb-2">CAREER ADVICE</div>
-            <h2 className="text-2xl font-bold mb-3">How to Spot a "Ghoster" Before the First Call</h2>
-            <p className="text-gray-600 mb-4">Red flags are easy to spot if you know where to look. Here is the 5-point checklist...</p>
-            <button className="text-sm font-bold underline">Read Article</button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderLegal = (type) => (
-    <div className="max-w-3xl mx-auto px-4 py-12 prose prose-blue">
-      <h1 className="text-2xl md:text-3xl font-black mb-6">{type === 'privacy' ? 'Privacy Policy' : 'Terms of Use'}</h1>
-      <p className="lead text-lg md:text-xl text-gray-600 mb-8">Last Updated: December 2025.</p>
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-500">This is a placeholder legal document for the prototype.</div>
-    </div>
-  );
-
-  const renderAddRecruiter = () => (
-    <div className="max-w-xl mx-auto px-4 py-8">
-       <button onClick={() => handleSetView('home')} className="mb-6 text-gray-500 hover:text-gray-900 flex items-center gap-1 text-sm font-medium"><ChevronRight className="w-4 h-4 rotate-180" /> Back</button>
-      <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-        <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2"><UserPlus className="w-6 h-6 text-blue-600" /> Add Profile</h2>
-        <form onSubmit={handleAddRecruiter} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Reviewer First Name <span className="text-gray-400 font-normal">(Optional)</span></label>
-              <input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                value={addRecruiterForm.firstName} onChange={e => setAddRecruiterForm({...addRecruiterForm, firstName: e.target.value})} />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Reviewer Last Name <span className="text-gray-400 font-normal">(Optional)</span></label>
-              <input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                value={addRecruiterForm.lastName} onChange={e => setAddRecruiterForm({...addRecruiterForm, lastName: e.target.value})} />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Role Applied For <span className="text-red-500">*</span></label>
-            <input required placeholder="e.g. Software Engineer..." className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-              value={addRecruiterForm.roleTitle} onChange={e => setAddRecruiterForm({...addRecruiterForm, roleTitle: e.target.value})} />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Company <span className="text-red-500">*</span></label>
-            <input required placeholder="e.g. Google, Amazon..." className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-              value={addRecruiterForm.firm} onChange={e => setAddRecruiterForm({...addRecruiterForm, firm: e.target.value})} />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Location (City, State)</label>
-            <input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-              value={addRecruiterForm.location} onChange={e => setAddRecruiterForm({...addRecruiterForm, location: e.target.value})} />
-          </div>
-          <button type="submit" disabled={!addRecruiterForm.firm || !addRecruiterForm.roleTitle}
-            className={`w-full font-bold py-4 rounded-xl transition-colors mt-6 ${addRecruiterForm.firm && addRecruiterForm.roleTitle ? 'bg-black text-white hover:bg-gray-900 shadow-lg' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}>
-            Next: Write Review
-          </button>
-        </form>
-      </div>
-    </div>
-  );
 
   const renderSuccess = () => {
     if (!submittedReview) return null;
@@ -412,464 +315,79 @@ export default function App() {
     );
   };
 
-  const renderHome = () => (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
-      <div className="text-center max-w-2xl">
-        <LandingLogo />
-        <p className="text-xl md:text-2xl text-gray-600 mb-2 font-bold">The Professional Accountability Utility.</p>
-        <p className="text-sm text-gray-400 mb-10 font-medium tracking-wide uppercase">Gossip is noise. Data is power.</p>
-        <div className="relative w-full max-w-xl mx-auto mb-16 shadow-2xl rounded-full bg-white group border border-gray-100">
-          <div className="absolute inset-0 w-full h-16 pl-14 pr-6 rounded-full flex items-center pointer-events-none overflow-hidden text-lg">
-             <span className="text-transparent whitespace-pre">{searchQuery}</span>
-             {bestMatch && bestMatch.name.toLowerCase() !== searchQuery.toLowerCase() && (<span className="text-gray-300">{bestMatch.name.slice(searchQuery.length)}</span>)}
-          </div>
-          <input type="text" placeholder={bestMatch ? "" : "PreView, ReView, or leave an eView..."} className="relative w-full h-16 pl-14 pr-6 rounded-full border-0 bg-transparent text-lg focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-900 z-10 placeholder-gray-400"
-            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleSearchKeyDown} spellCheck="false" autoComplete="off" />
-          <Search className="absolute left-5 top-5 text-gray-400 w-6 h-6 z-20" />
-          {bestMatch && bestMatch.name.toLowerCase() !== searchQuery.toLowerCase() && (
-            <div className="absolute right-6 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium pointer-events-none z-20 hidden md:block">Press <span className="border border-gray-200 bg-gray-50 rounded px-1.5 py-0.5 text-[10px]">TAB</span></div>
-          )}
-        </div>
-      </div>
-      <div className="w-full max-w-7xl">
-        {searchQuery && (
-          <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
-            <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2"><FileCheck className="w-5 h-5 text-blue-600" />{showAutoAddProfile ? 'Creating Profile' : 'Search Results'}</h2>
-          </div>
-        )}
-        {showAutoAddProfile ? (
-          <div className="bg-white p-8 rounded-2xl shadow-xl border border-blue-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center gap-2 mb-6 text-blue-600"><Info className="w-5 h-5" /><span className="font-bold">No data found. Initialize a new profile.</span></div>
-            <form onSubmit={handleAddRecruiter} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label className="block text-sm font-bold text-gray-700 mb-1">Reviewer First Name <span className="text-gray-400 font-normal">(Optional)</span></label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.firstName} onChange={e => setAddRecruiterForm({...addRecruiterForm, firstName: e.target.value})} /></div>
-                <div><label className="block text-sm font-bold text-gray-700 mb-1">Reviewer Last Name <span className="text-gray-400 font-normal">(Optional)</span></label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.lastName} onChange={e => setAddRecruiterForm({...addRecruiterForm, lastName: e.target.value})} /></div>
-              </div>
-              <div><label className="block text-sm font-bold text-gray-700 mb-1">Role Applied For <span className="text-red-500">*</span></label><input required placeholder="e.g. Software Engineer..." className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.roleTitle} onChange={e => setAddRecruiterForm({...addRecruiterForm, roleTitle: e.target.value})} /></div>
-              <div><label className="block text-sm font-bold text-gray-700 mb-1">Company <span className="text-red-500">*</span></label><input required placeholder="e.g. Google, Amazon..." className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.firm} onChange={e => setAddRecruiterForm({...addRecruiterForm, firm: e.target.value})} /></div>
-              <div><label className="block text-sm font-bold text-gray-700 mb-1">Location (City, State)</label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.location} onChange={e => setAddRecruiterForm({...addRecruiterForm, location: e.target.value})} /></div>
-              <button type="submit" disabled={!addRecruiterForm.firm || !addRecruiterForm.roleTitle} className={`w-full font-bold py-4 rounded-xl transition-colors mt-6 flex items-center justify-center gap-2 ${addRecruiterForm.firm && addRecruiterForm.roleTitle ? 'bg-black text-white hover:bg-gray-900 shadow-lg' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}>Proceed to Verification <ArrowRight className="w-4 h-4" /></button>
-            </form>
-          </div>
-        ) : searchQuery ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{filteredRecruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
-        ) : (
-          <div className="space-y-12">
-            {(view === 'home' || view === 'eviews') && dashboardData.recruiters.length > 0 && (
-              <div>
-                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-600" /> Top Individual eViews</h2></div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{dashboardData.recruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
-              </div>
-            )}
-            {(view === 'home' || view === 'teams') && dashboardData.teams.length > 0 && (
-              <div>
-                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 flex items-center gap-2"><Building className="w-5 h-5 text-blue-600" /> Top Team eViews</h2></div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{dashboardData.teams.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
-              </div>
-            )}
-            {dashboardData.recruiters.length === 0 && dashboardData.teams.length === 0 && (
-              <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                <p className="text-gray-500 mb-4 text-lg">No data available for this region.</p>
-                <button onClick={() => handleSetView('add')} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 shadow-lg">Submit the First Review</button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderRecruiterProfile = () => (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <button onClick={() => handleSetView('home')} className="mb-6 text-gray-500 hover:text-gray-900 flex items-center gap-1 text-sm font-medium">
-        <ChevronRight className="w-4 h-4 rotate-180" /> Back to Dashboard
-      </button>
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-2 h-full bg-blue-600"></div>
-        <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">{selectedRecruiter.name || "Hiring Team"}</h1>
-            <div className="flex flex-col gap-2 text-lg text-gray-600">
-              <span className="flex items-center gap-2"><Building className="w-5 h-5 text-gray-400" /> {selectedRecruiter.firm}</span>
-              {selectedRecruiter.roleTitle && (
-                <span className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-gray-400" /> {selectedRecruiter.roleTitle}</span>
-              )}
-              <span className="flex items-center gap-2"><MapPin className="w-5 h-5 text-gray-400" /> {selectedRecruiter.location || 'Location Not Listed'}</span>
-            </div>
-          </div>
-          <div className="flex gap-4 items-center">
-             <div className="text-right hidden md:block">
-                <div className="text-sm font-bold text-gray-400 uppercase tracking-wider">Overall Score</div>
-                <div className="text-xs text-gray-400">Based on {selectedRecruiter.reviewCount || 0} {selectedRecruiter.reviewCount === 1 ? 'review' : 'reviews'}</div>
-             </div>
-             <div className={`text-5xl md:text-6xl font-black tracking-tighter ${
-                selectedRecruiter.rating >= 4 ? 'text-green-500' : 
-                selectedRecruiter.rating >= 3 ? 'text-yellow-500' : 
-                'text-gray-300'
-              }`}>
-                {selectedRecruiter.rating ? selectedRecruiter.rating.toFixed(1) : 'N/A'}
-             </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-between items-center mb-8 bg-gray-50 p-4 rounded-xl border border-gray-200">
-        <div>
-          <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <Scale className="w-5 h-5" />
-            Process Reviews
-          </h3>
-        </div>
-        {hasReviewed ? (
-          <div className="bg-green-100 text-green-800 px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-sm border border-green-200">
-            <Check className="w-5 h-5" />
-            Review Verified
-          </div>
-        ) : (
-          <button 
-            onClick={() => setShowGuidelines(true)}
-            className="bg-black text-white px-6 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition-colors shadow-lg flex items-center gap-2"
-          >
-            <Flag className="w-4 h-4" />
-            Submit a Review
-          </button>
-        )}
-      </div>
-      <div className="space-y-6">
-        {reviews.length > 0 ? reviews.map(review => (
-          <div key={review.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative">
-            <div className="mb-4">
-               <h4 className="text-xl font-black text-gray-900 leading-tight mb-2">"{review.headline}"</h4>
-               <div className="flex items-center gap-3 text-sm">
-                 <div className={`px-2 py-0.5 rounded font-bold text-white text-xs ${
-                   review.rating >= 4 ? 'bg-green-500' : review.rating >= 2.5 ? 'bg-yellow-500' : 'bg-red-500'
-                 }`}>
-                   {review.rating ? review.rating.toFixed(1) : '-'} / 5.0
-                 </div>
-                 {review.stage && (
-                   <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-medium uppercase tracking-wide">
-                     Stage: {STAGES.find(s => s.id === review.stage)?.label || review.stage}
-                   </span>
-                 )}
-                 {review.verified && (
-                   <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1 border border-blue-100">
-                     <FileCheck className="w-3 h-3" /> Evidence Available
-                   </span>
-                 )}
-               </div>
-            </div>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {review.tags && review.tags.map(tagId => {
-                const tagDef = SCOOP_TAGS.find(t => t.id === tagId);
-                return tagDef ? (
-                  <span 
-                    key={tagId} 
-                    className={`text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 ${
-                      tagDef.type === 'positive' 
-                        ? 'bg-green-50 text-green-700 border border-green-100' 
-                        : tagDef.type === 'critical'
-                        ? 'bg-red-600 text-white border-red-600 shadow-md'
-                        : 'bg-red-50 text-red-700 border border-red-100'
-                    }`}
-                  >
-                    {tagDef.type === 'positive' ? <Check className="w-3 h-3" /> : tagDef.type === 'critical' ? <AlertTriangle className="w-3 h-3" /> : <X className="w-3 h-3" />}
-                    {tagDef.label}
-                  </span>
-                ) : null;
-              })}
-            </div>
-            {review.comment && (
-              <div className="mt-4 pt-4 border-t border-gray-50">
-                <p className="text-gray-700 leading-relaxed font-light">
-                  {review.comment}
-                </p>
-              </div>
-            )}
-            <button 
-              onClick={() => handleFlagReview(review.id, review.flags)}
-              className="absolute top-6 right-6 text-gray-300 hover:text-red-500"
-              title="Flag for review"
-            >
-              <Flag className="w-4 h-4" />
-            </button>
-          </div>
-        )) : (
-          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
-            <FileText className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No Data Yet</h3>
-            <p className="text-gray-500 mb-6">Start the paper trail for this profile.</p>
-            <button 
-              onClick={() => setShowGuidelines(true)}
-              className="text-blue-600 font-bold hover:underline"
-            >
-              Initialize Review Process
-            </button>
-          </div>
-        )}
-      </div>
-      <GuidelinesModal 
-        isOpen={showGuidelines} 
-        onClose={() => setShowGuidelines(false)}
-        onAccept={() => {
-          setShowGuidelines(false);
-          handleSetView('rate');
-        }}
-      />
-    </div>
-  );
-
-  const renderRateForm = () => {
-    const MAX_WORDS = 300;
-    const wordCount = rateForm.comment.trim() ? rateForm.comment.trim().split(/\s+/).length : 0;
-    return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <button onClick={() => handleSetView('recruiter')} className="mb-6 text-gray-500 hover:text-gray-900 flex items-center gap-1 text-sm font-medium">
-        <ChevronRight className="w-4 h-4 rotate-180" /> Cancel
-      </button>
-      <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-        <div className="mb-10 border-b pb-6">
-          <div className="flex items-center gap-3 mb-2">
-             <div className="bg-blue-100 p-2 rounded-lg"><Scale className="w-6 h-6 text-blue-600" /></div>
-             <h2 className="text-3xl font-black text-gray-900">Process Review</h2>
-          </div>
-          <p className="text-gray-500 text-lg">You are reviewing the process for <span className="font-bold text-gray-900">{selectedRecruiter.name || "Hiring Team"}</span> at {selectedRecruiter.firm}</p>
-        </div>
-        {/* 1. Milestones */}
-        <div className="mb-12">
-          <h3 className="text-lg font-black text-gray-900 mb-1">1. Process Milestones</h3>
-          <p className="text-sm text-gray-500 mb-4">Identify objective facts about the interaction.</p>         
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Wins */}
-            <div className="space-y-3">
-               <div className="flex items-center gap-2 text-green-700 font-bold text-xs uppercase tracking-wider mb-2">
-                 <ThumbsUp className="w-4 h-4" /> Process Wins
-               </div>
-               {SCOOP_TAGS.filter(t => t.type === 'positive').map(tag => (
-                 <button
-                   key={tag.id}
-                   onClick={() => toggleTag(tag.id)}
-                   className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
-                     rateForm.tags.includes(tag.id)
-                       ? 'bg-green-600 text-white border-green-600 shadow-md transform scale-[1.02]'
-                       : 'bg-white border-gray-200 text-gray-600 hover:bg-green-50'
-                   }`}
-                 >
-                   <div className="text-left">
-                     <div className="font-bold text-sm">{tag.label}</div>
-                     <div className={`text-xs ${rateForm.tags.includes(tag.id) ? 'text-green-100' : 'text-gray-400'}`}>{tag.desc}</div>
-                   </div>
-                   {rateForm.tags.includes(tag.id) && <Check className="w-5 h-5" />}
-                 </button>
-               ))}
-            </div>
-            {/* Gaps */}
-            <div className="space-y-3">
-               <div className="flex items-center gap-2 text-red-700 font-bold text-xs uppercase tracking-wider mb-2">
-                 <ThumbsDown className="w-4 h-4" /> Process Gaps
-               </div>
-               {SCOOP_TAGS.filter(t => t.type === 'negative').map(tag => (
-                 <button
-                   key={tag.id}
-                   onClick={() => toggleTag(tag.id)}
-                   className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
-                     rateForm.tags.includes(tag.id)
-                       ? 'bg-red-600 text-white border-red-600 shadow-md transform scale-[1.02]'
-                       : 'bg-white border-red-200 text-gray-600 hover:bg-red-50'
-                   }`}
-                 >
-                   <div className="text-left">
-                     <div className="font-bold text-sm">{tag.label}</div>
-                     <div className={`text-xs ${rateForm.tags.includes(tag.id) ? 'text-red-100' : 'text-gray-400'}`}>{tag.desc}</div>
-                   </div>
-                   {rateForm.tags.includes(tag.id) && <X className="w-5 h-5" />}
-                 </button>
-               ))}
-            </div>
-            {/* Critical */}
-            <div className="space-y-3 col-span-full mt-4 pt-4 border-t border-gray-100">
-               <div className="flex items-center gap-2 text-red-600 font-black text-xs uppercase tracking-wider mb-2">
-                 <AlertTriangle className="w-4 h-4" /> Process Failures (Accountability)
-               </div>
-               <div className="grid md:grid-cols-2 gap-6">
-                 {SCOOP_TAGS.filter(t => t.type === 'critical').map(tag => (
-                   <button
-                     key={tag.id}
-                     onClick={() => toggleTag(tag.id)}
-                     className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
-                       rateForm.tags.includes(tag.id)
-                         ? 'bg-red-600 text-white border-red-600 shadow-xl transform scale-[1.02]'
-                         : 'bg-white border-red-200 text-gray-600 hover:bg-red-50'
-                     }`}
-                   >
-                     <div className="text-left">
-                       <div className="font-bold text-sm">{tag.label}</div>
-                       <div className={`text-xs ${rateForm.tags.includes(tag.id) ? 'text-red-100' : 'text-gray-400'}`}>{tag.desc}</div>
-                     </div>
-                     {rateForm.tags.includes(tag.id) && <AlertTriangle className="w-5 h-5" />}
-                   </button>
-                 ))}
-               </div>
-            </div>
-          </div>
-        </div>
-        {/* 2. Headline & Context */}
-        <div className="mb-12">
-          <h3 className="text-lg font-black text-gray-900 mb-4">2. Context</h3>          
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-            {STAGES.map(stage => (
-              <button
-                key={stage.id}
-                onClick={() => setRateForm({...rateForm, stage: stage.id})}
-                className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold border transition-all ${
-                  rateForm.stage === stage.id
-                    ? 'bg-black text-white border-black'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
-                }`}
-              >
-                {stage.label}
-              </button>
-            ))}
-          </div>
-          <input 
-            className="w-full text-xl font-bold p-4 border-b-2 border-gray-200 focus:border-black outline-none bg-transparent placeholder-gray-300 mb-6 transition-colors"
-            placeholder="Headline (e.g. Professional and transparent process)"
-            value={rateForm.headline}
-            onChange={e => setRateForm({...rateForm, headline: e.target.value})}
-          />          
-          <textarea 
-            rows={4}
-            className="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-            placeholder="Detailed notes on the process (Optional)..."
-            value={rateForm.comment}
-            onChange={e => setRateForm({...rateForm, comment: e.target.value})}
-          />
-          <div className="flex justify-end mt-1">
-             <span className={`text-xs font-medium ${wordCount > MAX_WORDS ? 'text-red-500' : 'text-gray-400'}`}>
-               {wordCount} / {MAX_WORDS} words
-             </span>
-          </div>
-        </div>
-        {/* 3. Verification & Rating */}
-        <div className="mb-10 bg-gray-900 p-6 rounded-xl text-center text-white">
-          <label className="block text-sm font-bold uppercase tracking-widest text-gray-400 mb-3">Final Verdict</label>
-          <div className="flex justify-center mb-4">
-            <StarRating rating={rateForm.rating} setRating={(r) => setRateForm({...rateForm, rating: r})} size="lg" />
-          </div>         
-          <div className="flex items-center justify-center gap-3 mt-6 pt-6 border-t border-gray-800">
-            <input 
-              type="checkbox" 
-              id="verified-check" 
-              className="w-5 h-5 rounded text-blue-600 focus:ring-offset-gray-900"
-              checked={rateForm.verified}
-              onChange={e => setRateForm({...rateForm, verified: e.target.checked})}
-            />
-            <label htmlFor="verified-check" className="text-sm text-gray-300 text-left cursor-pointer">
-              I can provide proof of interaction (email/screenshot) if requested.
-            </label>
-          </div>
-        </div>
-        <Captcha onVerify={setCaptchaVerified} />
-        <div className="mb-8 mt-6 flex gap-3 items-start">
-          <input 
-            type="checkbox" 
-            id="legal-check" 
-            className="mt-1 w-5 h-5 text-blue-600 rounded"
-            checked={rateForm.agreed}
-            onChange={e => setRateForm({...rateForm, agreed: e.target.checked})}
-          />
-          <label htmlFor="legal-check" className="text-sm text-gray-600">
-            I certify this review is based on a genuine interaction and adheres to eView standards.
-          </label>
-        </div>
-        <button 
-          onClick={handleSubmitReview}
-          disabled={!rateForm.stage || !rateForm.headline || rateForm.rating === 0 || !rateForm.agreed || wordCount > MAX_WORDS || !captchaVerified}
-          className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:-translate-y-1 ${
-            rateForm.stage && rateForm.headline && rateForm.rating > 0 && rateForm.agreed && wordCount <= MAX_WORDS && captchaVerified
-              ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-xl'
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          Submit Verified Review
-        </button>
-      </div>
-    </div>
-  );
-  };
 
   // ----------------------------------------------------------  Main Render 
 
   return (
-    <div className="min-h-screen bg-white font-sans text-gray-900">
-      <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div onClick={() => { handleSetView('home'); setSearchQuery(''); setSelectedRecruiter(null); }} className="cursor-pointer hover:opacity-80 transition-opacity"><HeaderLogo /></div>
-          <div className="hidden md:flex items-center gap-6 text-sm font-bold text-gray-600">
-            <button onClick={() => { handleSetView('eviews'); }} className="hover:text-black">Individual eViews</button>
-            <button onClick={() => { handleSetView('teams'); }} className="hover:text-black">Team eViews</button>
-            <button onClick={() => handleSetView('add')} className="text-black hover:text-blue-600">Add Profile</button>
-            <div className="flex gap-2">
-               <ComingSoonButton label="eViewer" popupText="eViewer coming soon" icon="🤫" />
-               <ComingSoonButton label="eViewer Teams" popupText="eViewer Teams coming soon" icon="🙄" />
-            </div>
-          </div>
-          <button className="md:hidden text-gray-900" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>{mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}</button>
+    <Layout 
+      setView={handleSetView} 
+      setSearchQuery={setSearchQuery} 
+      setSelectedRecruiter={setSelectedRecruiter}
+    >
+      {loading ? (
+        <div className="flex items-center justify-center h-[50vh]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
         </div>
-        {mobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 p-4 shadow-xl flex flex-col gap-4 text-center">
-            <button onClick={() => handleSetView('home')} className="font-bold text-gray-900 py-2">Partners</button>
-            <button onClick={() => handleSetView('blog')} className="font-bold text-gray-900 py-2">Blog</button>
-            <button onClick={() => handleSetView('add')} className="font-bold text-blue-600 py-2">Add Profile</button>
-          </div>
-        )}
-      </nav>
-      <main className="pb-20">
-        {loading ? (
-          <div className="flex items-center justify-center h-[50vh]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div></div>
-        ) : (
-          <>
-            {(view === 'home' || view === 'eviews' || view === 'teams') && renderHome()}
-            {view === 'recruiter' && selectedRecruiter && renderRecruiterProfile()}
-            {view === 'rate' && selectedRecruiter && renderRateForm()}
-            {view === 'add' && renderAddRecruiter()}
-            {view === 'success' && renderSuccess()}
-            {view === 'blog' && renderBlog()}
-            {view === 'contact' && renderContact()}
-            {view === 'privacy' && renderLegal('privacy')}
-            {view === 'terms' && renderLegal('terms')}
-          </>
-        )}
-      </main>
-      <footer className="bg-black text-gray-400 py-16 px-6">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12 text-sm">
-          <div className="col-span-1 bm-6 lg:col-span-2 pr-8">
-            <div className="mb-2"><FooterLogo /></div>
-            <p className="leading-relaxed mb-6 text-gray-400"><strong className="text-white block mb-2">The Professional Accountability Utility.</strong>eView is the industry standard for process transparency. We replace gossip with governance, providing objective data to optimize the hiring ecosystem.</p>
-            <div className="flex gap-4"><span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Objective</span><span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Verified</span><span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Secure</span></div>
-          </div>
-          <div>
-            <h4 className="text-white font-bold mb-6 text-lg">Utility</h4>
-            <ul className="space-y-4">
-              <li><button onClick={() => { handleSetView('home'); setSearchQuery(''); }} className="hover:text-white transition-colors text-left">PreView Check</button></li>
-              <li><button onClick={() => handleSetView('home')} className="hover:text-white transition-colors text-left">Verified Partners</button></li>
-              <li><button onClick={() => handleSetView('blog')} className="hover:text-white transition-colors text-left">Process Blog</button></li>
-              <li><button onClick={() => handleSetView('blog')} className="hover:text-black">Intel Blog</button></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-white font-bold mb-6 text-lg">Governance</h4>
-            <ul className="space-y-4">
-              <li><button onClick={() => handleSetView('privacy')} className="hover:text-white transition-colors text-left">Privacy Policy</button></li>
-              <li><button onClick={() => handleSetView('terms')} className="hover:text-white transition-colors text-left">Terms of Use</button></li>
-              <li><button onClick={() => handleSetView('terms')} className="hover:text-white transition-colors text-left">Standards</button></li>
-              <li><button onClick={() => handleSetView('contact')} className="hover:text-white transition-colors text-left">Contact Us</button></li>
-            </ul>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto border-t border-gray-900 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600">
-          <p>© 2025 eView. All Rights Reserved.</p>
-          <p className="mt-2 md:mt-0">We aren't here to burn bridges; we're here to light the way.</p>
-        </div>
-      </footer>
-    </div>
+      ) : (
+        <>
+          {(view === 'home' || view === 'eviews' || view === 'teams') && (
+            <Home 
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              bestMatch={bestMatch}
+              handleSearchKeyDown={handleSearchKeyDown}
+              filteredRecruiters={filteredRecruiters}
+              showAutoAddProfile={showAutoAddProfile}
+              handleAddRecruiter={handleAddRecruiter}
+              addRecruiterForm={addRecruiterForm}
+              setAddRecruiterForm={setAddRecruiterForm}
+              dashboardData={dashboardData}
+              view={view}
+              handleSetView={handleSetView}
+              setSelectedRecruiter={setSelectedRecruiter}
+            />
+          )}
+
+          {view === 'recruiter' && selectedRecruiter && (
+            <RecruiterProfile 
+              selectedRecruiter={selectedRecruiter}
+              handleSetView={handleSetView}
+              hasReviewed={hasReviewed}
+              reviews={reviews}
+              handleFlagReview={handleFlagReview}
+            />
+          )}
+
+          {view === 'rate' && selectedRecruiter && (
+            <RateForm 
+              selectedRecruiter={selectedRecruiter}
+              rateForm={rateForm}
+              setRateForm={setRateForm}
+              captchaVerified={captchaVerified}
+              setCaptchaVerified={setCaptchaVerified}
+              onSubmit={handleSubmitReview}
+              onCancel={() => handleSetView('recruiter')}
+            />
+          )}
+
+          {view === 'add' && (
+            <AddRecruiter 
+              form={addRecruiterForm}
+              setForm={setAddRecruiterForm}
+              onSubmit={handleAddRecruiter}
+              onCancel={() => handleSetView('home')}
+            />
+          )}
+
+          {view === 'success' && renderSuccess()}
+          
+          {view === 'blog' && <BlogPage />}
+          {view === 'contact' && <ContactPage />}
+          {view === 'privacy' && <LegalPage type="privacy" />}
+          {view === 'terms' && <LegalPage type="terms" />}
+        </>
+      )}
+    </Layout>
   );
+
 }
