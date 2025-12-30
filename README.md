@@ -99,7 +99,7 @@ This repository is maintained by the eView technical team. Code contributions sh
 For inquiries regarding the platform, partnerships, or technical support, please contact:
 
 * **Contact Name:** Matthew Rockwell
-* **Contact Email:** contact@ReVieweReView.com
+* **Contact Email:** [contact@eView.com](contact@ReVieweReView.com)
 * **Contact LinkedIn:** [eView](https://www.linkedin.com/company/reviewereview)
 * **Contact X:** [@eView](https://x.com/ReVieweReView)
 
