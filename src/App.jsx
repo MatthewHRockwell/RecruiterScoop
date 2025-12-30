@@ -1,48 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { signInAnonymously, onAuthStateChanged,signInWithCustomToken } from 'firebase/auth';
-
-import { 
-  collection, 
-  addDoc, 
-  onSnapshot, 
-  query, 
-  serverTimestamp,
-  doc,
-  updateDoc,
-  increment
- } from 'firebase/firestore';
-
-import { 
-  Search, 
-  UserPlus, 
-  Briefcase, 
-  MapPin, 
-  Flag, 
-  Menu,
-  ChevronRight,
-  Info,
-  Check,
-  X,
-  ThumbsUp,
-  ThumbsDown,
-  Share2,
-  ArrowRight,
-  FileText,
-  AlertTriangle,
-  Building,
-  FileCheck,
-  Scale
- } from 'lucide-react';
-
+import { collection, addDoc, onSnapshot, query, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
+import { Search, UserPlus, Briefcase, MapPin, Flag, Menu,ChevronRight,Info,Check,X,ThumbsUp,ThumbsDown,Share2,ArrowRight,FileText,AlertTriangle,Building,FileCheck,Scale } from 'lucide-react';
 // 1. Import Config
 import { auth, db } from './config/firebase';
-
 // 2. Import Constants
 import { STAGES, SCOOP_TAGS, APP_ID } from './constants/data';
-
 // 3. Import Utils
 import { getBrowserFingerprint } from './utils/helper';
-
 // 4. Import Components (You need to create these files first!)
 import RecruiterCard from './components/RecruiterCard';
 import StarRating from './components/StarRating';
@@ -50,20 +15,14 @@ import Captcha from './components/Captcha';
 import ShareModal from './components/ShareModal';
 import GuidelinesModal from './components/GuidelinesModal';
 import ComingSoonButton from './components/ComingSoonButton';
-
-// ... import logos and others as needed
+// 5. import logos and others as needed
 import headerLogoIcon from './assets/eView_Silhoutte.svg';
 import LandingLogoIcon from './assets/eView_Silhoutte_Captioned_Unbolded.svg';
 import FooterLogoIcon from './assets/eView_Silhoutte_Captioned_Inverted.svg';
 
-
-
-
-
-
 const appId = APP_ID;
 
-// ---------------------------------------------------------- Branding Components -----------------------------------------------------------
+// ---------------------------------------------------------- Define Logos
 
 const HeaderLogo = ({ className = "h-20 w-auto" }) => (
   <img 
@@ -73,16 +32,13 @@ const HeaderLogo = ({ className = "h-20 w-auto" }) => (
   />
 );
 
-
 const LandingLogo = ({ className = "h-40 w-auto" }) => (
   <img 
     src={LandingLogoIcon} 
     alt="eView Logo" 
-    // CHANGE 'mb-4' to 'mb-0' or remove it entirely 👇
     className={`${className} select-none mx-auto`}
   />
 );
-
 
 const FooterLogo = ({ className = "h-20 w-auto" }) => (
   <img 
@@ -92,10 +48,7 @@ const FooterLogo = ({ className = "h-20 w-auto" }) => (
   />
 );
 
-
-
-// ----------------------------------------------------------------- MAIN APP ------------------------------------------------------------
-
+// ----------------------------------------------------------  MAIN APP 
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -117,11 +70,9 @@ export default function App() {
     stage: '', tags: [], headline: '', comment: '', rating: 0, agreed: false, verified: false
   });
 
-
   const [addRecruiterForm, setAddRecruiterForm] = useState({
     firstName: '', lastName: '', firm: '', location: '', roleTitle: ''
   });
-
 
   const handleSetView = (newView) => {
     setView(newView);
@@ -158,7 +109,6 @@ export default function App() {
 
     return () => unsubscribe();
   }, []);
-
 
   useEffect(() => {
     if (!user) return;
@@ -215,7 +165,6 @@ export default function App() {
     handleSetView('rate');
   };
 
-
   const handleSubmitReview = async () => {
     if (!selectedRecruiter || !captchaVerified || rateForm.rating === 0 || !rateForm.agreed) return;
     try {
@@ -255,14 +204,12 @@ export default function App() {
     } catch (err) { console.error("Error submitting review:", err); }
   };
 
-
   const handleFlagReview = async (reviewId, currentFlags) => {
     try {
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reviews', reviewId), { flags: (currentFlags || 0) + 1 });
       alert("This Review has been flagged for moderation.");
     } catch (err) { console.error(err); }
   };
-
 
   const toggleTag = (tagId) => {
     setRateForm(prev => {
@@ -275,7 +222,6 @@ export default function App() {
     });
   };
 
-
   const bestMatch = useMemo(() => {
     if (!searchQuery || searchQuery.length < 2) return null;
     const searchLower = searchQuery.toLowerCase();
@@ -283,7 +229,6 @@ export default function App() {
     if (matches.length === 0) return null;
     return matches.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0))[0];
   }, [recruiters, searchQuery]);
-
 
   const handleSearchKeyDown = (e) => {
     if ((e.key === 'Tab' || e.key === 'ArrowRight') && bestMatch) {
@@ -298,7 +243,6 @@ export default function App() {
     }
   };
 
-
   const filteredRecruiters = useMemo(() => {
     const searchLower = searchQuery.toLowerCase();
     const matches = recruiters.filter(r => r.name?.toLowerCase().includes(searchLower) || r.firm?.toLowerCase().includes(searchLower));
@@ -310,7 +254,6 @@ export default function App() {
       return (b.reviewCount || 0) - (a.reviewCount || 0);
     });
   }, [recruiters, searchQuery]);
-
 
   const dashboardData = useMemo(() => {
     if (searchQuery) return { recruiters: [], teams: [] };
@@ -336,16 +279,14 @@ export default function App() {
     return { recruiters: namedRecruiters.sort(ranker).slice(0, 8), teams: hiringTeams.sort(ranker).slice(0, 8) };
   }, [recruiters, userLocation, searchQuery]);
 
-
   const showAutoAddProfile = searchQuery.length > 0 && filteredRecruiters.length === 0;
-
 
   const copyToClipboard = (text) => {
     const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el);
     el.select(); document.execCommand('copy'); document.body.removeChild(el); alert("Text copied!");
   };
 
-  // -------------------------------------------------- Render Functions (Internal) ---------------------------------------------------------
+ // ----------------------------------------------------------  Render Functions (Internal) 
   
   const renderContact = () => (
     <div className="max-w-2xl mx-auto px-4 py-12">
@@ -360,7 +301,6 @@ export default function App() {
       </div>
     </div>
   );
-
 
   const renderBlog = () => (
     <div className="max-w-4xl mx-auto px-4 py-12">
@@ -378,7 +318,6 @@ export default function App() {
     </div>
   );
 
-
   const renderLegal = (type) => (
     <div className="max-w-3xl mx-auto px-4 py-12 prose prose-blue">
       <h1 className="text-2xl md:text-3xl font-black mb-6">{type === 'privacy' ? 'Privacy Policy' : 'Terms of Use'}</h1>
@@ -386,7 +325,6 @@ export default function App() {
       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-500">This is a placeholder legal document for the prototype.</div>
     </div>
   );
-
 
   const renderAddRecruiter = () => (
     <div className="max-w-xl mx-auto px-4 py-8">
@@ -429,7 +367,6 @@ export default function App() {
       </div>
     </div>
   );
-
 
   const renderSuccess = () => {
     if (!submittedReview) return null;
@@ -474,7 +411,6 @@ export default function App() {
       </div>
     );
   };
-
 
   const renderHome = () => (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
@@ -542,7 +478,6 @@ export default function App() {
       </div>
     </div>
   );
-
 
   const renderRecruiterProfile = () => (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -681,7 +616,6 @@ export default function App() {
       />
     </div>
   );
-
 
   const renderRateForm = () => {
     const MAX_WORDS = 300;
@@ -862,7 +796,7 @@ export default function App() {
   );
   };
 
-  // ---------------------------------------------------------- Main Render -----------------------------------------------------------------
+  // ----------------------------------------------------------  Main Render 
 
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">
