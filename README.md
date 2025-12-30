@@ -45,6 +45,8 @@ src/
 ├── constants/       # Static data (Tag definitions, App IDs)
 ├── utils/           # Helper functions (Fingerprinting, formatting)
 └── App.jsx          # Main application controller and routing logic
+├── index.css        # Index styling configuration (Uses Tailwind css reference)
+└── main.jsx         # Runs 'App' in 'StrictMode' (Debugging Support Tool)
 ```
 
 ## Installation and Setup
