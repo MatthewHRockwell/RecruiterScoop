@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 
 export const useRecruiterData = (recruiters, searchQuery, userLocation) => {
   
-  // 1. Filtered List Logic
   const filteredRecruiters = useMemo(() => {
     const searchLower = searchQuery.toLowerCase();
     const matches = recruiters.filter(r => r.name?.toLowerCase().includes(searchLower) || r.firm?.toLowerCase().includes(searchLower));
@@ -15,9 +14,8 @@ export const useRecruiterData = (recruiters, searchQuery, userLocation) => {
     });
   }, [recruiters, searchQuery]);
 
-  // 2. Dashboard Logic
   const dashboardData = useMemo(() => {
-    if (searchQuery) return { recruiters: [], teams: [] };
+    if (searchQuery) return { candidates: [], interviewers: [], recruiters: [], teams: [] };
     
     const isCriticalProfile = (r) => {
       const total = r.reviewCount || 0;
@@ -28,36 +26,44 @@ export const useRecruiterData = (recruiters, searchQuery, userLocation) => {
     const ranker = (a, b) => {
        const aBad = isCriticalProfile(a); const bBad = isCriticalProfile(b);
        if (aBad && !bBad) return 1; if (!aBad && bBad) return -1;
-       
        if (userLocation) {
-         const aLoc = (a.location || '').toLowerCase(); 
-         const bLoc = (b.location || '').toLowerCase(); 
+         const aLoc = (a.location || '').toLowerCase(); const bLoc = (b.location || '').toLowerCase(); 
          const loc = userLocation.toLowerCase();
-         const aIsLocal = aLoc.includes(loc); 
-         const bIsLocal = bLoc.includes(loc);
-         if (aIsLocal && !bIsLocal) return -1; 
-         if (!aIsLocal && bIsLocal) return 1;
+         if (aLoc.includes(loc) && !bLoc.includes(loc)) return -1; 
+         if (!aLoc.includes(loc) && bLoc.includes(loc)) return 1;
        }
-       
        const scoreA = (a.rating || 0) * Math.log((a.reviewCount || 0) + 1);
        const scoreB = (b.rating || 0) * Math.log((b.reviewCount || 0) + 1);
        return scoreB - scoreA;
     };
 
-    const namedRecruiters = recruiters.filter(r => r.name && r.name.trim() !== '');
+    const allNamed = recruiters.filter(r => r.name && r.name.trim() !== '');
+    
+    // --- 4-WAY SPLIT LOGIC ---
+    
+    // 1. Candidates
+    const candidates = allNamed.filter(r => r.type === 'candidate' || r.isCandidate === true);
+    
+    // 2. Recruiters (Agency/External)
+    const recruitersList = allNamed.filter(r => r.type === 'recruiter');
+    
+    // 3. Interviewers (Hiring Managers / Internal)
+    // Fallback: If no type specified and not isCandidate, assume Interviewer (Legacy Default)
+    const interviewers = allNamed.filter(r => r.type === 'interviewer' || (!r.type && !r.isCandidate));
+    
+    // 4. Hiring Teams (No name)
     const hiringTeams = recruiters.filter(r => !r.name || r.name.trim() === '');
     
-    // NEW (Send everything, let Home.jsx handle the slicing):
     return { 
-        recruiters: namedRecruiters.sort(ranker), 
+        candidates: candidates.sort(ranker),
+        recruiters: recruitersList.sort(ranker),
+        interviewers: interviewers.sort(ranker), 
         teams: hiringTeams.sort(ranker) 
     };
   }, [recruiters, userLocation, searchQuery]);
 
-  // 3. Derived State
   const showAutoAddProfile = searchQuery.length > 0 && filteredRecruiters.length === 0;
 
-  // 4. Best Match
   const bestMatch = useMemo(() => {
     if (!searchQuery || searchQuery.length < 2) return null;
     const searchLower = searchQuery.toLowerCase();

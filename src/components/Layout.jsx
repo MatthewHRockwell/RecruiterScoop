@@ -80,7 +80,7 @@ const Layout = ({ children, setView, setSearchQuery, setSelectedRecruiter }) => 
           </div>
         </div>
         <div className="max-w-7xl mx-auto border-t border-gray-900 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600">
-          <p>© 2025 eView. All Rights Reserved.</p>
+          <p>© 2025 Rockwell Industries LLC. All Rights Reserved.</p>
         </div>
       </footer>
     </div>
