@@ -1,7 +1,7 @@
 import React from 'react';
 import headerLogoIcon from '../assets/Man_Silhoutte_Down_V2.svg';
 import LandingLogoIcon from '../assets/eView_Silhoutte_V2.svg';
-import FooterLogoIcon from '../assets/eView_Silhoutte_Captioned_Inverted.svg';
+import FooterLogoIcon from '../assets/eView_Silhoutte_Inverted_V2.svg';
 
 export const HeaderLogo = ({ className = "h-10 w-auto", onClick }) => (
   <div onClick={onClick} className="cursor-pointer hover:opacity-80 transition-opacity">
@@ -25,6 +25,6 @@ export const FooterLogo = ({ className = "h-20 w-auto" }) => (
   <img 
     src={FooterLogoIcon} 
     alt="eView" 
-    className={`${className} select-none bm-0 tm-0`}
+    className={`${className} select-none `}
   />
 );

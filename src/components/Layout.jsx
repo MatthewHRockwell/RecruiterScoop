@@ -60,7 +60,7 @@ const Layout = ({ children, setView, setSearchQuery, setSelectedRecruiter }) => 
       <footer className="bg-black text-gray-400 py-16 px-6">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12 text-sm">
           <div className="col-span-1 bm-6 lg:col-span-2 pr-8">
-            <div className="mb-2"><FooterLogo /></div>
+            <div className="mb-0"><FooterLogo /></div>
             <p className="leading-relaxed mb-6 text-gray-400"><strong className="text-white block mb-2">The Professional Accountability Utility.</strong>eView is the industry standard for process transparency.</p>
           </div>
           <div>

@@ -47,9 +47,10 @@ export const useRecruiterData = (recruiters, searchQuery, userLocation) => {
     const namedRecruiters = recruiters.filter(r => r.name && r.name.trim() !== '');
     const hiringTeams = recruiters.filter(r => !r.name || r.name.trim() === '');
     
+    // NEW (Send everything, let Home.jsx handle the slicing):
     return { 
-        recruiters: namedRecruiters.sort(ranker).slice(0, 8), 
-        teams: hiringTeams.sort(ranker).slice(0, 8) 
+        recruiters: namedRecruiters.sort(ranker), 
+        teams: hiringTeams.sort(ranker) 
     };
   }, [recruiters, userLocation, searchQuery]);
 

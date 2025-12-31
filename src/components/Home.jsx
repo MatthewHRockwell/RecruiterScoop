@@ -1,8 +1,167 @@
-import React from 'react';
-import { Search, UserPlus, Building, FileCheck, ArrowRight, Info } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { 
+  Search, 
+  UserPlus, 
+  Building, 
+  FileCheck, 
+  ArrowRight, 
+  Info,
+  ChevronLeft,
+  ChevronRight 
+} from 'lucide-react';
 import { LandingLogo } from './Logos';
 import RecruiterCard from './RecruiterCard';
 
+// --- INTERNAL COMPONENT 1: HORIZONTAL CAROUSEL (For Main Page) ---
+const CarouselSection = ({ title, icon: Icon, data, renderItem }) => {
+  const scrollContainer = useRef(null);
+
+  const scroll = (direction) => {
+    if (scrollContainer.current) {
+      const scrollAmount = 320; // Approx width of one card + gap
+      scrollContainer.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  if (data.length === 0) return null;
+
+  return (
+    <div className="w-full max-w-7xl mx-auto mb-12 relative group">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-4 px-1">
+        <Icon className="w-5 h-5 text-blue-600" />
+        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+      </div>
+
+      {/* Carousel Container */}
+      <div className="relative">
+        {/* Left Arrow Overlay */}
+        <button 
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-700 p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 hover:bg-gray-50"
+          aria-label="Scroll Left"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+
+        {/* Scrollable Area */}
+        <div 
+          ref={scrollContainer}
+          className="flex gap-5 overflow-x-auto pb-6 pt-2 px-1 scrollbar-hide snap-x snap-mandatory"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {data.map((item) => (
+            <div key={item.id} className="min-w-[280px] md:min-w-[320px] snap-center">
+              {renderItem(item)}
+            </div>
+          ))}
+        </div>
+
+        {/* Right Arrow Overlay */}
+        <button 
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-700 p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 hover:bg-gray-50"
+          aria-label="Scroll Right"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// --- INTERNAL COMPONENT 2: PAGINATED GRID (For Individual/Team Pages) ---
+const PaginatedSection = ({ title, icon: Icon, data, renderItem }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(16);
+
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+
+  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+  
+  const handleLimitChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1); 
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="mb-8 border-b border-gray-100 pb-4">
+        <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <Icon className="w-5 h-5 text-blue-600" />
+          {title}
+        </h2>
+      </div>
+
+      {/* Grid Content */}
+      {data.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {currentItems.map((item) => renderItem(item))}
+          </div>
+
+          {/* Bottom Centered Controls */}
+          <div className="flex justify-center items-center gap-6">
+            
+            {/* Arrows & Page Count Group */}
+            <div className="flex items-center gap-3 bg-white rounded-full border border-gray-200 px-2 py-1 shadow-sm">
+              <button 
+                onClick={prevPage} 
+                disabled={currentPage === 1}
+                className="p-2 hover:bg-gray-100 rounded-full disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-600"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              
+              <span className="px-2 font-bold text-gray-700 min-w-[3rem] text-center text-sm">
+                {currentPage} / {totalPages || 1}
+              </span>
+              
+              <button 
+                onClick={nextPage} 
+                disabled={currentPage === totalPages || totalPages === 0}
+                className="p-2 hover:bg-gray-100 rounded-full disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-600"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Dropdown (Right of Arrows) */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Show</span>
+              <select 
+                value={itemsPerPage} 
+                onChange={handleLimitChange}
+                className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-700 font-medium focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm hover:border-gray-300 transition-colors"
+              >
+                <option value={16}>16</option>
+                <option value={32}>32</option>
+                <option value={48}>48</option>
+                <option value={64}>64</option>
+              </select>
+            </div>
+
+          </div>
+        </>
+      ) : (
+        <div className="text-center py-12 text-gray-400 italic">
+          No eViews found in this category.
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --- MAIN HOME COMPONENT ---
 const Home = ({ 
   searchQuery, setSearchQuery, bestMatch, handleSearchKeyDown, 
   filteredRecruiters, showAutoAddProfile, handleAddRecruiter, 
@@ -42,66 +201,90 @@ const Home = ({
 
       {/* 2. Content Area */}
       <div className="w-full max-w-7xl">
-        {searchQuery && (
-          <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
-            <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2"><FileCheck className="w-5 h-5 text-blue-600" />{showAutoAddProfile ? 'Creating Profile' : 'Search Results'}</h2>
-          </div>
-        )}
+        
+        {/* A. SEARCH MODE */}
+        {searchQuery ? (
+          <>
+            <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
+              <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide flex items-center gap-2">
+                <FileCheck className="w-5 h-5 text-blue-600" />
+                {showAutoAddProfile ? 'Creating Profile' : 'Search Results'}
+              </h2>
+            </div>
 
-        {showAutoAddProfile ? (
-          /* Auto-Add Form */
-          <div className="bg-white p-8 rounded-2xl shadow-xl border border-blue-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center gap-2 mb-6 text-blue-600"><Info className="w-5 h-5" /><span className="font-bold">No data found. Initialize a new profile.</span></div>
-            <form onSubmit={handleAddRecruiter} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label className="block text-sm font-bold text-gray-700 mb-1">Reviewer First Name <span className="text-gray-400 font-normal">(Optional)</span></label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.firstName} onChange={e => setAddRecruiterForm({...addRecruiterForm, firstName: e.target.value})} /></div>
-                <div><label className="block text-sm font-bold text-gray-700 mb-1">Reviewer Last Name <span className="text-gray-400 font-normal">(Optional)</span></label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.lastName} onChange={e => setAddRecruiterForm({...addRecruiterForm, lastName: e.target.value})} /></div>
+            {showAutoAddProfile ? (
+              /* Auto-Add Form */
+              <div className="bg-white p-8 rounded-2xl shadow-xl border border-blue-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex items-center gap-2 mb-6 text-blue-600"><Info className="w-5 h-5" /><span className="font-bold">No data found. Initialize a new profile.</span></div>
+                <form onSubmit={handleAddRecruiter} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label className="block text-sm font-bold text-gray-700 mb-1">Reviewer First Name <span className="text-gray-400 font-normal">(Optional)</span></label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.firstName} onChange={e => setAddRecruiterForm({...addRecruiterForm, firstName: e.target.value})} /></div>
+                    <div><label className="block text-sm font-bold text-gray-700 mb-1">Reviewer Last Name <span className="text-gray-400 font-normal">(Optional)</span></label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.lastName} onChange={e => setAddRecruiterForm({...addRecruiterForm, lastName: e.target.value})} /></div>
+                  </div>
+                  <div><label className="block text-sm font-bold text-gray-700 mb-1">Role Applied For <span className="text-red-500">*</span></label><input required placeholder="e.g. Software Engineer..." className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.roleTitle} onChange={e => setAddRecruiterForm({...addRecruiterForm, roleTitle: e.target.value})} /></div>
+                  <div><label className="block text-sm font-bold text-gray-700 mb-1">Company <span className="text-red-500">*</span></label><input required placeholder="e.g. Google, Amazon..." className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.firm} onChange={e => setAddRecruiterForm({...addRecruiterForm, firm: e.target.value})} /></div>
+                  <div><label className="block text-sm font-bold text-gray-700 mb-1">Location (City, State)</label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.location} onChange={e => setAddRecruiterForm({...addRecruiterForm, location: e.target.value})} /></div>
+                  <button type="submit" disabled={!addRecruiterForm.firm || !addRecruiterForm.roleTitle} className={`w-full font-bold py-4 rounded-xl transition-colors mt-6 flex items-center justify-center gap-2 ${addRecruiterForm.firm && addRecruiterForm.roleTitle ? 'bg-black text-white hover:bg-gray-900 shadow-lg' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}>Proceed to Verification <ArrowRight className="w-4 h-4" /></button>
+                </form>
               </div>
-              <div><label className="block text-sm font-bold text-gray-700 mb-1">Role Applied For <span className="text-red-500">*</span></label><input required placeholder="e.g. Software Engineer..." className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.roleTitle} onChange={e => setAddRecruiterForm({...addRecruiterForm, roleTitle: e.target.value})} /></div>
-              <div><label className="block text-sm font-bold text-gray-700 mb-1">Company <span className="text-red-500">*</span></label><input required placeholder="e.g. Google, Amazon..." className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.firm} onChange={e => setAddRecruiterForm({...addRecruiterForm, firm: e.target.value})} /></div>
-              <div><label className="block text-sm font-bold text-gray-700 mb-1">Location (City, State)</label><input className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={addRecruiterForm.location} onChange={e => setAddRecruiterForm({...addRecruiterForm, location: e.target.value})} /></div>
-              <button type="submit" disabled={!addRecruiterForm.firm || !addRecruiterForm.roleTitle} className={`w-full font-bold py-4 rounded-xl transition-colors mt-6 flex items-center justify-center gap-2 ${addRecruiterForm.firm && addRecruiterForm.roleTitle ? 'bg-black text-white hover:bg-gray-900 shadow-lg' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}>Proceed to Verification <ArrowRight className="w-4 h-4" /></button>
-            </form>
-          </div>
-        ) : searchQuery ? (
-          /* Search Results */
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{filteredRecruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
+            ) : (
+              /* Standard Search Results */
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {filteredRecruiters.map(recruiter => (
+                  <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />
+                ))}
+              </div>
+            )}
+          </>
+
         ) : (
-          /* Main Dashboard Views */
-          <div className="space-y-12">
+          /* B. DASHBOARD MODE (Home vs Individual vs Teams) */
+          <div>
             
-            {/* VIEW: HOME or INDIVIDUALS */}
-            {(view === 'home' || view === 'eviews') && dashboardData.recruiters.length > 0 && (
-              <div>
-                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
-                  <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
-                    <UserPlus className="w-5 h-5 text-blue-600" /> 
-                    Individual eViews
-                  </h2>
-                </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {dashboardData.recruiters.map(recruiter => (
+            {/* 1. MAIN LANDING PAGE: Use Carousel */}
+            {view === 'home' && (
+              <div className="space-y-4">
+                <CarouselSection 
+                  title="Individual eViews" 
+                  icon={UserPlus}
+                  data={dashboardData.recruiters}
+                  renderItem={(recruiter) => (
                     <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />
-                  ))}
-                </div>
+                  )}
+                />
+                
+                <CarouselSection 
+                  title="Team eViews" 
+                  icon={Building}
+                  data={dashboardData.teams}
+                  renderItem={(recruiter) => (
+                    <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />
+                  )}
+                />
               </div>
             )}
 
-            {/* VIEW: HOME or TEAMS */}
-            {(view === 'home' || view === 'teams') && dashboardData.teams.length > 0 && (
-              <div>
-                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
-                  <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
-                    <Building className="w-5 h-5 text-blue-600" /> 
-                    Team eViews
-                  </h2>
-                </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {dashboardData.teams.map(recruiter => (
-                    <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />
-                  ))}
-                </div>
-              </div>
+            {/* 2. SPECIFIC PAGES: Use Paginated Grid */}
+            {view === 'eviews' && (
+              <PaginatedSection 
+                title="Individual eViews" 
+                icon={UserPlus}
+                data={dashboardData.recruiters}
+                renderItem={(recruiter) => (
+                  <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />
+                )}
+              />
+            )}
+
+            {view === 'teams' && (
+              <PaginatedSection 
+                title="Team eViews" 
+                icon={Building}
+                data={dashboardData.teams}
+                renderItem={(recruiter) => (
+                  <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />
+                )}
+              />
             )}
 
             {/* EMPTY STATE */}
