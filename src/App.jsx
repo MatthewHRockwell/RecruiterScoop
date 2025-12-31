@@ -1,3 +1,6 @@
+
+
+
 // ----------------------------------------------------------  BEGIN IMPORTS
 
 // React Imports
@@ -8,8 +11,6 @@ import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from '
 import { db } from './config/firebase';
 //Constants Imports
 import { SCOOP_TAGS, APP_ID } from './constants/data';
-//Utilities Imports
-import { getBrowserFingerprint } from './utils/helper';
 //Components Imports
 import Layout from './components/Layout';
 import { ContactPage, BlogPage, LegalPage } from './components/StaticPages';
@@ -23,6 +24,7 @@ import { useRecruiterData } from './hooks/useRecruiterData';
 import { useAuth } from './hooks/useAuth';
 import { useFirestore } from './hooks/useFirestore';
 // ----------------------------------------------------------  END IMPORTS
+
 
 
 // ----------------------------------------------------------  BEGIN EXPORTS
@@ -41,6 +43,7 @@ export default function App() {
   const { user, userLocation, userFingerprint } = useAuth();
   const { recruiters, reviews, loading, hasReviewed, setHasReviewed } = useFirestore(user, selectedRecruiter, userFingerprint);
   const { filteredRecruiters, dashboardData, showAutoAddProfile, bestMatch } = useRecruiterData(recruiters, searchQuery, userLocation);
+
   // 3. Handlers
   const handleSetView = (newView) => {
     setView(newView);

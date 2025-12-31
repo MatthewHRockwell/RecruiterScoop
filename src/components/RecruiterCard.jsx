@@ -17,9 +17,15 @@ const RecruiterCard = ({ recruiter, onClick }) => {
   const totalReviews = recruiter.reviewCount || 0;
   const isFlagged = totalReviews > 0 && (criticalCount / totalReviews) >= 0.10;
 
+  // If name exists, use it. 
+// If not, use "[Company] Hiring Team". 
+// Fallback to "Hiring Team" if firm is somehow missing.
+const displayName = recruiter.name && recruiter.name.trim() !== '' 
+  ? recruiter.name 
+  : (recruiter.firm ? `${recruiter.firm} Hiring Team` : "Hiring Team");
+
   const getDateString = () => {
     if (!recruiter.lastReviewed) return 'Recently';
-    // Handle Firebase Timestamp (seconds)
     return new Date(recruiter.lastReviewed.seconds * 1000).toLocaleDateString();
   };
 
@@ -34,7 +40,7 @@ const RecruiterCard = ({ recruiter, onClick }) => {
     <div onClick={onClick} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden">
       
       {/* Top Right: Rating Badge */}
-      <div className="absolute top-0 right-0 p-4 flex flex-col items-end gap-2">
+      <div className="absolute top-0 right-0 p-4 flex flex-col items-end gap-2 z-10">
         {isFlagged ? (
           <div className="bg-red-100 text-red-600 w-12 h-12 rounded-lg border border-red-200 shadow-sm flex items-center justify-center" title="High volume of safety flags reported">
             <AlertTriangle className="w-6 h-6" />
@@ -53,33 +59,46 @@ const RecruiterCard = ({ recruiter, onClick }) => {
       </div>
 
       {/* Main Content */}
-      <div className="pr-16">
-        <h3 className="font-bold text-lg text-gray-900 mb-1 leading-tight">{recruiter.name || "Hiring Team"}</h3>
+      <div className="pr-14"> {/* Added padding-right to prevent text from going under the badge */}
         
-        <div className="text-gray-500 text-sm flex items-center gap-2 mb-2">
-          <Building className="w-3 h-3" /> {recruiter.firm}
+        {/* NAME: Truncated */}
+        <h3 
+          className="font-bold text-lg text-gray-900 mb-1 leading-tight truncate" 
+          title={displayName} // Hover tooltip
+        >
+          {displayName}
+        </h3>
+        
+        {/* FIRM: Truncated */}
+        <div className="text-gray-500 text-sm flex items-center gap-2 mb-2" title={recruiter.firm}>
+          <Building className="w-3 h-3 flex-shrink-0" /> 
+          <span className="truncate">{recruiter.firm}</span>
         </div>
         
         <div className="flex flex-col gap-1">
             {recruiter.location && (
               <div className="flex items-center gap-2 text-xs text-gray-400">
-                <MapPin className="w-3 h-3" /> {recruiter.location}
+                <MapPin className="w-3 h-3 flex-shrink-0" /> 
+                <span className="truncate">{recruiter.location}</span>
               </div>
             )}
             {recruiter.lastReviewed && (
               <div className="flex items-center gap-2 text-xs text-gray-400">
-                <Clock className="w-3 h-3" /> {getDateString()}
+                <Clock className="w-3 h-3 flex-shrink-0" /> 
+                <span className="truncate">{getDateString()}</span>
               </div>
             )}
         </div>
 
         <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
             {recruiter.roleTitle && (
-              <div className="flex items-center gap-2 text-xs font-bold text-blue-600">
-                <Briefcase className="w-3 h-3" /> {recruiter.roleTitle}
+              <div className="flex items-center gap-2 text-xs font-bold text-blue-600 flex-1 min-w-0" title={recruiter.roleTitle}>
+                <Briefcase className="w-3 h-3 flex-shrink-0" /> 
+                <span className="truncate">{recruiter.roleTitle}</span>
               </div>
             )}
-            <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
+            {/* Review count keeps its full width */}
+            <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider flex-shrink-0 ml-2">
               <span>{recruiter.reviewCount || 0} {recruiter.reviewCount === 1 ? 'Review' : 'Reviews'}</span>
             </div>
         </div>

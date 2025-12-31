@@ -31,8 +31,8 @@ const Layout = ({ children, setView, setSearchQuery, setSelectedRecruiter }) => 
           <div className="hidden md:flex items-center gap-6 text-sm font-bold text-gray-600">
             {navLinks}
             <div className="flex gap-2">
-               <ComingSoonButton label="eViewer" popupText="eViewer coming soon" icon="🤫" />
-               <ComingSoonButton label="eViewer Teams" popupText="eViewer Teams coming soon" icon="🙄" />
+               <ComingSoonButton label="eView" popupText="eView coming soon" />
+               <ComingSoonButton label="eView Teams" popupText="eView Teams coming soon" />
             </div>
           </div>
 

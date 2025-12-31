@@ -10,7 +10,7 @@ const Home = ({
   view, handleSetView, setSelectedRecruiter 
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 py-8">
       {/* 1. Hero Section */}
       <div className="text-center max-w-2xl">
         <LandingLogo />
@@ -67,20 +67,44 @@ const Home = ({
           /* Search Results */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{filteredRecruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
         ) : (
-          /* Dashboard */
+          /* Main Dashboard Views */
           <div className="space-y-12">
+            
+            {/* VIEW: HOME or INDIVIDUALS */}
             {(view === 'home' || view === 'eviews') && dashboardData.recruiters.length > 0 && (
               <div>
-                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-600" /> Top Individual eViews</h2></div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{dashboardData.recruiters.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
+                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
+                  <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
+                    <UserPlus className="w-5 h-5 text-blue-600" /> 
+                    Individual eViews
+                  </h2>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {dashboardData.recruiters.map(recruiter => (
+                    <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />
+                  ))}
+                </div>
               </div>
             )}
+
+            {/* VIEW: HOME or TEAMS */}
             {(view === 'home' || view === 'teams') && dashboardData.teams.length > 0 && (
               <div>
-                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2"><h2 className="text-xl font-black text-gray-900 flex items-center gap-2"><Building className="w-5 h-5 text-blue-600" /> Top Team eViews</h2></div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{dashboardData.teams.map(recruiter => <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />)}</div>
+                <div className="flex justify-between items-end mb-6 border-b border-gray-100 pb-2">
+                  <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
+                    <Building className="w-5 h-5 text-blue-600" /> 
+                    Team eViews
+                  </h2>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {dashboardData.teams.map(recruiter => (
+                    <RecruiterCard key={recruiter.id} recruiter={recruiter} onClick={() => { setSelectedRecruiter(recruiter); handleSetView('recruiter'); }} />
+                  ))}
+                </div>
               </div>
             )}
+
+            {/* EMPTY STATE */}
             {dashboardData.recruiters.length === 0 && dashboardData.teams.length === 0 && (
               <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
                 <p className="text-gray-500 mb-4 text-lg">No data available for this region.</p>
